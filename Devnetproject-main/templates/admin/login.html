@@ -1,0 +1,114 @@
+{% block content %}
+<style>
+  /* Center the login box vertically and horizontally, with background image */
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Replace the URL below with your own background image URL or path */
+    background-image: url('https://deepai.org/machine-learning-model/text2img');
+    background-size: cover; /* Cover the entire background */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat;
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  title at top of the page */
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 32px;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+  } 
+
+
+  /* Optional overlay for better contrast */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.2); /* semi-transparent overlay */
+    z-index: -1;
+  }
+
+  /* Styling for the login container */
+  .login-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    border-radius: 12px;
+    background: #775aa5; /* Deep purple background */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    border-style: double;
+    fadedge-color: #6a1b9a;
+  }
+
+
+  /* Hover effect for the login box */
+  .login-box:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Header styling */
+  .login-box h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #333;
+  }
+
+  /* Error message styling */
+  .error-message {
+    color: #d9534f; /* Bootstrap danger color */
+    background-color: #f8d7da; /* Light red background */
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  /* Form spacing */
+  form p {
+    margin-bottom: 15px;
+  }
+
+  /* Submit button styling */
+  .default {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #6f2292;
+    color: #f4e7e7;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  /* Button hover effect */
+  .default:hover {
+    background-color: #0069d9;
+  }
+</style>
+
+<div class="login-box">
+  <h2>Devenet Admin Portal</h2>
+
+  {% if form.errors %}
+    <div class="error-message">Invalid username or password</div>
+  {% endif %}
+
+  <form method="post" action="{{ app_path }}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="default">Login</button>
+  </form>
+</div>
+{% endblock %}

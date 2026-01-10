@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACAS Vulnerability Management Dashboard</title>
+
+<style>
+:root {
+  --bg-dark:#1f2933;
+  --bg-panel:#ffffff;
+  --bg-header:#111827;
+  --text-light:#e5e7eb;
+  --text-dark:#1f2933;
+  --border:#d1d5db;
+
+  --cat1:#b91c1c;
+  --cat2:#d97706;
+  --cat3:#ca8a04;
+  --low:#2563eb;
+}
+
+body {
+  margin:0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background:#e5e7eb;
+  color:var(--text-dark);
+}
+
+header {
+  background:var(--bg-header);
+  color:var(--text-light);
+  padding:25px 40px;
+}
+
+header h1 {
+  margin:0;
+  font-size:1.8em;
+}
+
+header p {
+  margin-top:5px;
+  font-size:13px;
+  color:#9ca3af;
+}
+
+.container {
+  max-width:1300px;
+  margin:30px auto;
+  padding:0 20px;
+}
+
+section {
+  background:var(--bg-panel);
+  margin-bottom:25px;
+  padding:20px;
+  border-radius:6px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.1);
+}
+
+h2 {
+  margin-top:0;
+  font-size:1.3em;
+  border-bottom:2px solid var(--border);
+  padding-bottom:8px;
+}
+
+.controls {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+input {
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:4px;
+}
+
+button {
+  padding:8px 14px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-primary {
+  background:#2563eb;
+  color:#fff;
+}
+
+.btn-success {
+  background:#15803d;
+  color:#fff;
+}
+
+button:disabled {
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:14px;
+}
+
+th, td {
+  padding:10px;
+  border:1px solid var(--border);
+  text-align:left;
+}
+
+th {
+  background:#f3f4f6;
+}
+
+.cat1 { color:var(--cat1); font-weight:700; }
+.cat2 { color:var(--cat2); font-weight:700; }
+.cat3 { color:var(--cat3); font-weight:700; }
+.low  { color:var(--low); font-weight:700; }
+
+.status-open {
+  color:#b91c1c;
+  font-weight:600;
+}
+
+progress {
+  width:300px;
+}
+
+footer {
+  text-align:center;
+  padding:20px;
+  font-size:12px;
+  color:#6b7280;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Assured Compliance Assessment Solution (ACAS)</h1>
+  <p>Training / Simulation Environment — No live scanning performed</p>
+</header>
+
+<div class="container">
+
+<!-- ASSET MANAGEMENT -->
+<section>
+  <h2>Asset Management</h2>
+  <form class="controls" onsubmit="addAsset(event)">
+    <input id="assetInput" placeholder="Enter IP address or hostname" required>
+    <button class="btn-primary">Add Asset</button>
+  </form>
+  <ul id="assetList"></ul>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<section>
+  <h2>Executive Summary</h2>
+  <table>
+    <tr>
+      <th>Total Assets</th>
+      <th>CAT I (Critical)</th>
+      <th>CAT II (High)</th>
+      <th>CAT III (Medium)</th>
+      <th>Low</th>
+    </tr>
+    <tr>
+      <td id="assetCount">0</td>
+      <td id="cat1">0</td>
+      <td id="cat2">0</td>
+      <td id="cat3">0</td>
+      <td id="low">0</td>
+    </tr>
+  </table>
+</section>
+
+<!-- SCAN CONTROL -->
+<section>
+  <h2>Scan Operations</h2>
+  <div class="controls">
+    <button id="scanBtn" class="btn-success" onclick="startScan()">Run ACAS Scan</button>
+    <div id="scanStatus" style="display:none;">
+      <span id="scanText">Scanning assets...</span><br>
+      <progress id="scanProgress" value="0" max="100"></progress>
+    </div>
+  </div>
+</section>
+
+<!-- FINDINGS -->
+<section>
+  <h2>Vulnerability Findings</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Asset</th>
+        <th>CAT</th>
+        <th>Severity</th>
+        <th>Finding</th>
+        <th>Status</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody id="results"></tbody>
+  </table>
+</section>
+
+</div>
+
+<footer>
+© 2024 ACAS Training Dashboard — For educational use only
+</footer>
+
+<script>
+let assets = [];
+let scanning = false;
+
+const findings = [
+  {cat:"CAT I", sev:"Critical", name:"Remote Code Execution (CVE-2023-20198)", desc:"Remote attackers may execute arbitrary code without authentication."},
+  {cat:"CAT II", sev:"High", name:"Outdated OpenSSH Service", desc:"Detected OpenSSH version is vulnerable to known exploits."},
+  {cat:"CAT III", sev:"Medium", name:"Weak TLS Cipher Configuration", desc:"The service supports weak or deprecated encryption ciphers."},
+  {cat:"Low", sev:"Low", name:"ICMP Timestamp Response Enabled", desc:"Host responds to ICMP timestamp requests."}
+];
+
+function addAsset(e){
+  e.preventDefault();
+  const input=document.getElementById("assetInput");
+  if(assets.includes(input.value)) return;
+  assets.push(input.value);
+  input.value="";
+  renderAssets();
+}
+
+function renderAssets(){
+  const list=document.getElementById("assetList");
+  list.innerHTML="";
+  assets.forEach(a=>list.innerHTML+=`<li>${a}</li>`);
+}
+
+function startScan(){
+  if(scanning || assets.length===0) return;
+  scanning=true;
+
+  document.getElementById("scanStatus").style.display="block";
+  document.getElementById("scanProgress").value=0;
+  document.getElementById("scanBtn").disabled=true;
+
+  let p=0;
+  const timer=setInterval(()=>{
+    p+=10;
+    document.getElementById("scanProgress").value=p;
+    if(p>=100){
+      clearInterval(timer);
+      scanning=false;
+      document.getElementById("scanText").textContent="Scan completed successfully";
+      document.getElementById("scanBtn").disabled=false;
+      generateResults();
+    }
+  },300);
+}
+
+function generateResults(){
+  const table=document.getElementById("results");
+  table.innerHTML="";
+  let c1=0,c2=0,c3=0,l=0;
+
+  assets.forEach(asset=>{
+    const count=Math.floor(Math.random()*3)+1;
+    for(let i=0;i<count;i++){
+      const f=findings[Math.floor(Math.random()*findings.length)];
+
+      if(f.cat==="CAT I") c1++;
+      else if(f.cat==="CAT II") c2++;
+      else if(f.cat==="CAT III") c3++;
+      else l++;
+
+      table.innerHTML+=`
+      <tr>
+        <td>${asset}</td>
+        <td class="${f.cat==="CAT I"?"cat1":f.cat==="CAT II"?"cat2":f.cat==="CAT III"?"cat3":"low"}">${f.cat}</td>
+        <td>${f.sev}</td>
+        <td>${f.name}</td>
+        <td class="status-open">Open</td>
+        <td>${f.desc}</td>
+      </tr>`;
+    }
+  });
+
+  document.getElementById("assetCount").textContent=assets.length;
+  document.getElementById("cat1").textContent=c1;
+  document.getElementById("cat2").textContent=c2;
+  document.getElementById("cat3").textContent=c3;
+  document.getElementById("low").textContent=l;
+}
+</script>
+
+</body>
+</html>

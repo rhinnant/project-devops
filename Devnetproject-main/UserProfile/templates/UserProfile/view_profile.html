@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Profile{% endblock %}
+
+{% block content %}
+<div class="container my-5 d-flex justify-content-center">
+  <div class="card shadow-lg rounded-4 p-4" style="max-width: 800px; background: linear-gradient(135deg, #f7f9fc, #e0f7fa);">
+    <div class="text-center mb-4">
+      <h1 class="display-4" style="color:#0066cc;">Your Profile</h1>
+      <p class="lead text-muted">Manage and view your personal information</p>
+    </div>
+    <div class="row g-4">
+      <!-- Profile Photo -->
+      <div class="col-md-4 text-center">
+        {% if request.user.profiles.image %}
+          <img src="{{ request.user.profiles.image.url }}" class="img-fluid rounded-circle border" alt="Profile Photo" style="width:200px; height:200px; object-fit:cover;">
+        {% else %}
+          <div class="d-flex align-items-center justify-content-center bg-light rounded-circle border" style="width:200px; height:200px;">
+            <i class="bi bi-person-circle" style="font-size:8rem; color:#ccc;"></i>
+          </div>
+        {% endif %}
+        <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3"><i class="bi bi-pencil-square me-2"></i>Edit Profile</a>
+      </div>
+      
+      <!-- Profile Details -->
+      <div class="col-md-8">
+        <ul class="list-group list-group-flush fs-5">
+          <li class="list-group-item d-flex align-items-center">
+            <i class="bi bi-person-fill me-3" style="font-size:1.5rem; color:#0066cc;"></i>
+            <div>
+              <strong>Full Name:</strong> {{ request.user.get_full_name }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-center">
+            <i class="bi bi-envelope-fill me-3" style="font-size:1.5rem; color:#0066cc;"></i>
+            <div>
+              <strong>Email:</strong> {{ request.user.email }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-center">
+            <i class="bi bi-shield-lock-fill me-3" style="font-size:1.5rem; color:#0066cc;"></i>
+            <div>
+              <strong>Role:</strong> {{ request.user.profiles.role }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-center">
+            <i class="bi bi-telephone-fill me-3" style="font-size:1.5rem; color:#0066cc;"></i>
+            <div>
+              <strong>Phone Number:</strong> {{ request.user.profiles.phone_number }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-center">
+            <i class="bi bi-building me-3" style="font-size:1.5rem; color:#0066cc;"></i>
+            <div>
+              <strong>Department:</strong> {{ request.user.profiles.department }}
+            </div>
+          </li>
+          <li class="list-group-item d-flex align-items-center">
+            <i class="bi bi-calendar3 me-3" style="font-size:1.5rem; color:#0066cc;"></i>
+            <div>
+              <strong>Member Since:</strong> {{ request.user.date_joined|date:"F j, Y" }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

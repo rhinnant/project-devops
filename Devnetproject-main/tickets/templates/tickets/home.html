@@ -1,0 +1,281 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Enterprise Ticket System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      color: #ffffff;
+    }
+    .card, .table, .navbar {
+      color: #ffffff;
+    }
+    .form-control, .form-select, textarea {
+      background-color: #1c1c1c !important;
+      color: #ffffff !important;
+      border-color: #6c757d !important;
+    }
+    .form-control::placeholder {
+      color: #adb5bd;
+    }
+    option {
+      background-color: #1c1c1c;
+      color: #ffffff;
+    }
+    .badge {
+      color: #ffffff !important;
+    }
+    .table-hover tbody tr:hover {
+      background-color: rgba(255,255,255,0.05);
+    }
+
+    /* ================= Priority hover highlights ================= */
+    .priority-high:hover { background-color: rgba(255, 0, 0, 0.15) !important; }
+    .priority-medium:hover { background-color: rgba(255, 255, 0, 0.15) !important; }
+    .priority-low:hover { background-color: rgba(0, 123, 255, 0.1) !important; }
+
+    .btn-outline-info:hover {
+      background-color: #0dcaf0;
+      color: #000 !important;
+    }
+    .card-header {
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+
+<body class="bg-dark text-light">
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold" href="#">🎫 Enterprise ITSM</a>
+    <span class="badge bg-success ms-2">Production</span>
+  </div>
+</nav>
+
+<div class="container-fluid p-4">
+
+  <!-- ================= HEADER ================= -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-0">Ticket Management</h2>
+      <small class="text-secondary">Centralized issue tracking & SLA management</small>
+    </div>
+  </div>
+
+  <!-- ================= KPI CARDS ================= -->
+  <div class="row mb-4 g-3">
+    <div class="col-md-3">
+      <div class="card bg-secondary text-light shadow-sm">
+        <div class="card-body text-center">
+          <h6>Total Tickets</h6>
+          <h3>{{ total_tickets }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-danger text-light shadow-sm">
+        <div class="card-body text-center">
+          <h6>High Priority</h6>
+          <h3>{{ high_priority }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-primary text-light shadow-sm">
+        <div class="card-body text-center">
+          <h6>Open Tickets</h6>
+          <h3>{{ open_tickets }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card bg-success text-light shadow-sm">
+        <div class="card-body text-center">
+          <h6>Resolved</h6>
+          <h3>{{ resolved_tickets }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CREATE TICKET ================= -->
+  <div class="card bg-black border-secondary mb-4 shadow">
+    <div class="card-header bg-primary fw-bold">
+      <i class="bi bi-plus-circle"></i> Create New Ticket
+    </div>
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button name="create_ticket" class="btn btn-success">
+          <i class="bi bi-check-circle"></i> Submit Ticket
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= TICKET TABLE ================= -->
+  <div class="table-responsive shadow">
+    <table class="table table-dark table-hover align-middle">
+      <thead class="table-secondary text-dark">
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Assigned</th>
+          <th>Created</th>
+          <th class="text-center">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for ticket in tickets %}
+        <tr class="
+          {% if ticket.priority == 'High' %}priority-high
+          {% elif ticket.priority == 'Medium' %}priority-medium
+          {% else %}priority-low{% endif %}">
+          <td class="fw-bold">{{ ticket.id }}</td>
+          <td>{{ ticket.title }}</td>
+
+          <!-- Priority -->
+          <td>
+            <span class="badge
+              {% if ticket.priority == 'High' %}bg-danger
+              {% elif ticket.priority == 'Medium' %}bg-warning text-dark
+              {% else %}bg-info text-dark{% endif %}">
+              {{ ticket.priority }}
+            </span>
+          </td>
+
+          <!-- Status -->
+          <td>
+            <span class="badge
+              {% if ticket.status == 'Open' %}bg-primary
+              {% elif ticket.status == 'In Progress' %}bg-warning text-dark
+              {% else %}bg-success{% endif %}">
+              {{ ticket.status }}
+            </span>
+          </td>
+
+          <!-- Assigned -->
+          <td>
+            {% if ticket.assigned_to %}
+              <span class="badge bg-success">{{ ticket.assigned_to.username }}</span>
+            {% else %}
+              <span class="badge bg-secondary">Unassigned</span>
+            {% endif %}
+
+            {% if request.user.is_staff %}
+            <div class="d-flex gap-1 mt-1">
+              <!-- Assign dropdown -->
+              <form method="post" action="{% url 'assign_ticket' ticket.id %}">
+                {% csrf_token %}
+                <select name="assigned_to" class="form-select form-select-sm bg-dark text-white border-secondary">
+                  {% for user in users %}
+                    <option value="{{ user.id }}" class="bg-dark text-white"
+                      {% if ticket.assigned_to == user %}selected{% endif %}>
+                      {{ user.username }}
+                    </option>
+                  {% endfor %}
+                </select>
+                <button class="btn btn-sm btn-outline-info mt-1">
+                  <i class="bi bi-person-check"></i> Assign
+                </button>
+              </form>
+
+              <!-- Assign to Me button -->
+              <form method="post" action="{% url 'assign_ticket' ticket.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="assigned_to" value="{{ request.user.id }}">
+                <button type="submit" class="btn btn-sm btn-outline-success mt-1" title="Assign to Me">
+                  <i class="bi bi-person-check"></i> Me
+                </button>
+              </form>
+            </div>
+            {% endif %}
+          </td>
+
+          <!-- Created -->
+          <td>{{ ticket.created_at|date:"Y-m-d H:i" }}</td>
+
+          <!-- Actions -->
+          <td class="text-center">
+            <a href="{% url 'edit_ticket' ticket.id %}" class="btn btn-sm btn-outline-warning me-1">
+              <i class="bi bi-pencil"></i>
+            </a>
+
+            {% if request.user.is_staff %}
+            <a href="{% url 'delete_ticket' ticket.id %}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">
+            <i class="bi bi-inbox"></i> No tickets found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="text-center text-secondary mt-4 small">
+    © 2026 Enterprise Ticket System • ITSM / SOC / Helpdesk Ready
+  </footer>
+
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Delete Ticket</title>
+</head>
+<body class="p-4">
+  <h3>Delete Ticket "{{ ticket.title }}"?</h3>
+  <form method="post">
+    {% csrf_token %}
+    <button class="btn btn-danger">Confirm Delete</button>
+    <a href="{% url 'ticket_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</body>
+</html>
+

@@ -1,0 +1,16 @@
+<h2>Vulnerabilities</h2>
+<table border="1">
+  <tr>
+    <th>Host</th>
+    <th>Plugin</th>
+    <th>Severity</th>
+  </tr>
+  {% for v in vulns %}
+  <tr>
+    <td>{{ v.host }}</td>
+    <td>{{ v.plugin_name }}</td>
+    <td>{{ v.severity }}</td>
+  </tr>
+  {% endfor %}
+</table>
+

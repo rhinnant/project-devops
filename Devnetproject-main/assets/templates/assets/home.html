@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enhanced Asset Inventory</title>
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+<style>
+  body {
+    padding-top: 70px;
+  }
+  .sidebar {
+    height: calc(100vh - 70px);
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 220px;
+    background-color: #343a40;
+    padding-top: 20px;
+  }
+  .sidebar a {
+    display: block;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+  }
+  .sidebar a:hover {
+    background-color: #495057;
+  }
+  .main {
+    margin-left: 220px;
+    padding: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">Asset Inventory</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <a href="#">Dashboard</a>
+  <a href="#">Assets</a>
+  <a href="#">Categories</a>
+  <a href="#">Reports</a>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+  <h2>Asset Management</h2>
+  <!-- Search & Add -->
+  <div class="d-flex justify-content-between mb-3">
+    <input type="text" id="searchInput" class="form-control w-50" placeholder="Search assets..." onkeyup="filterAssets()" />
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assetModal" onclick="showAddModal()">Add Asset</button>
+  </div>
+  
+  <!-- Asset Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover" id="assetTable">
+      <thead class="table-light">
+        <tr>
+          <th onclick="sortTable(0)">#</th>
+          <th onclick="sortTable(1)">Asset Name</th>
+          <th onclick="sortTable(2)">Category</th>
+          <th onclick="sortTable(3)">Quantity</th>
+          <th onclick="sortTable(4)">Location</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="assetBody"></tbody>
+    </table>
+  </div>
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination" id="pagination"></ul>
+  </nav>
+</div>
+
+<!-- Modal for Add/Edit Asset -->
+<div class="modal fade" id="assetModal" tabindex="-1" aria-labelledby="assetModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="assetForm" onsubmit="saveAsset(event)">
+        <div class="modal-header">
+          <h5 class="modal-title" id="assetModalLabel">Add Asset</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="assetId" />
+          <div class="mb-3">
+            <label for="assetName" class="form-label">Asset Name</label>
+            <input type="text" class="form-control" id="assetName" required />
+          </div>
+          <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <input type="text" class="form-control" id="category" required />
+          </div>
+          <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="quantity" min="1" required />
+          </div>
+          <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+            <input type="text" class="form-control" id="location" required />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save Asset</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  // Sample data
+  let assets = [
+    {id: 1, name: "Laptop Dell XPS 13", category: "Electronics", quantity: 10, location: "Office A"},
+    {id: 2, name: "Projector Epson", category: "Electronics", quantity: 2, location: "Conference Room"},
+    {id: 3, name: "Office Desk", category: "Furniture", quantity: 5, location: "Office B"}
+  ];
+
+  let currentPage = 1;
+  const rowsPerPage = 5;
+  let filteredAssets = [...assets];
+  let sortDirection = {};
+
+  // Display assets with pagination
+  function displayAssets() {
+    const tbody = document.getElementById('assetBody');
+    tbody.innerHTML = '';
+
+    // Pagination
+    const start = (currentPage - 1) * rowsPerPage;
+    const paginatedItems = filteredAssets.slice(start, start + rowsPerPage);
+
+    paginatedItems.forEach(asset => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${asset.id}</td>
+          <td>${asset.name}</td>
+          <td>${asset.category}</td>
+          <td>${asset.quantity}</td>
+          <td>${asset.location}</td>
+          <td>
+            <button class="btn btn-sm btn-warning" onclick="showEditModal(${asset.id})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteAsset(${asset.id})">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const pageCount = Math.ceil(filteredAssets.length / rowsPerPage);
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+
+    for (let i=1; i<=pageCount; i++) {
+      const li = document.createElement('li');
+      li.className = 'page-item' + (i===currentPage?' active':'');
+      li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+      li.onclick = () => { currentPage = i; displayAssets(); };
+      pagination.appendChild(li);
+    }
+  }
+
+  function filterAssets() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    filteredAssets = assets.filter(a =>
+      a.name.toLowerCase().includes(query) || a.category.toLowerCase().includes(query)
+    );
+    currentPage = 1;
+    displayAssets();
+  }
+
+  function sortTable(n) {
+    const keyMap = {
+      0: 'id',
+      1: 'name',
+      2: 'category',
+      3: 'quantity',
+      4: 'location'
+    };
+    const key = keyMap[n];
+    let direction = sortDirection[key] === 'asc' ? 'desc' : 'asc';
+    sortDirection = {}; // reset
+    sortDirection[key] = direction;
+
+    filteredAssets.sort((a, b) => {
+      if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
+      if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+    displayAssets();
+  }
+
+  // Show modal for adding new asset
+  function showAddModal() {
+    document.getElementById('assetForm').reset();
+    document.getElementById('assetId').value = '';
+    document.getElementById('assetModalLabel').innerText = 'Add Asset';
+    new bootstrap.Modal(document.getElementById('assetModal')).show();
+  }
+
+  // Show modal for editing asset
+  function showEditModal(id) {
+    const asset = assets.find(a => a.id === id);
+    if (asset) {
+      document.getElementById('assetId').value = asset.id;
+      document.getElementById('assetName').value = asset.name;
+      document.getElementById('category').value = asset.category;
+      document.getElementById('quantity').value = asset.quantity;
+      document.getElementById('location').value = asset.location;
+      document.getElementById('assetModalLabel').innerText = 'Edit Asset';
+      new bootstrap.Modal(document.getElementById('assetModal')).show();
+    }
+  }
+
+  // Save new or edited asset
+  function saveAsset(e) {
+    e.preventDefault();
+    const id = document.getElementById('assetId').value;
+    const name = document.getElementById('assetName').value;
+    const category = document.getElementById('category').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const location = document.getElementById('location').value;
+
+    if (id) {
+      // Edit existing
+      const asset = assets.find(a => a.id == id);
+      asset.name = name;
+      asset.category = category;
+      asset.quantity = quantity;
+      asset.location = location;
+    } else {
+      // Add new
+      const newId = Math.max(...assets.map(a => a.id)) + 1;
+      assets.push({id: newId, name, category, quantity, location});
+    }
+    filteredAssets = [...assets];
+    currentPage = 1;
+    displayAssets();
+    bootstrap.Modal.getInstance(document.getElementById('assetModal')).hide();
+  }
+
+  function deleteAsset(id) {
+    if(confirm('Delete asset ID: ' + id + '?')) {
+      assets = assets.filter(a => a.id !== id);
+      filteredAssets = [...assets];
+      displayAssets();
+    }
+  }
+
+  // Initialize display
+  window.onload = () => {
+    displayAssets();
+  };
+</script>
+
+</body>
+</html>

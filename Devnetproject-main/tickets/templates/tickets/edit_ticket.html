@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Enterprise Ticket</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body.dark-mode { background:#0f172a; color:#e5e7eb; }
+.dark-mode .card { background:#020617; border-color:#1e293b; }
+.dark-mode .list-group-item { background:#020617; color:#e5e7eb; }
+.dark-mode .form-control { background:#020617; color:white; border-color:#334155; }
+
+.sidebar {
+  min-height:100vh;
+  background:#020617;
+}
+.sidebar a {
+  color:#cbd5f5;
+  text-decoration:none;
+}
+.sidebar a:hover {
+  background:#1e293b;
+}
+
+.priority-high { color:#dc2626; }
+.priority-medium { color:#f59e0b; }
+.priority-low { color:#16a34a; }
+
+.sla-warning { color:#dc2626; font-weight:bold; }
+
+.timeline {
+  border-left:4px solid #3b82f6;
+  padding-left:20px;
+}
+.timeline-item { margin-bottom:25px; }
+
+.sticky-actions {
+  position:sticky;
+  bottom:0;
+  background:inherit;
+  padding:15px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body id="pageBody">
+
+<div class="container-fluid">
+<div class="row">
+
+<!-- SIDEBAR -->
+<div class="col-md-2 sidebar p-3">
+  <h5 class="text-white mb-4"><i class="bi bi-stack"></i> Ticket System</h5>
+  <a class="d-block p-2 rounded" href="#"><i class="bi bi-speedometer"></i> Dashboard</a>
+  <a class="d-block p-2 rounded" href="#"><i class="bi bi-ticket"></i> Tickets</a>
+  <a class="d-block p-2 rounded" href="#"><i class="bi bi-people"></i> Users</a>
+  <a class="d-block p-2 rounded" href="#"><i class="bi bi-gear"></i> Settings</a>
+</div>
+
+<!-- MAIN -->
+<div class="col-md-10 p-4">
+
+<!-- TOP BAR -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <nav>
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="#">Tickets</a></li>
+      <li class="breadcrumb-item active">#{{ ticket.id }}</li>
+    </ol>
+  </nav>
+
+  <button class="btn btn-outline-dark btn-sm" onclick="toggleDarkMode()">
+    <i class="bi bi-moon"></i>
+  </button>
+</div>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between mb-3">
+  <h4>
+    {{ ticket.title }}
+    {% if ticket.status == "Open" %}
+      <span class="badge bg-success">Open</span>
+    {% elif ticket.status == "In Progress" %}
+      <span class="badge bg-warning text-dark">In Progress</span>
+    {% else %}
+      <span class="badge bg-secondary">Closed</span>
+    {% endif %}
+  </h4>
+
+  <span class="sla-warning">
+    <i class="bi bi-alarm"></i> SLA: {{ ticket.sla_remaining }}
+  </span>
+</div>
+
+<div class="row">
+
+<!-- LEFT COLUMN -->
+<div class="col-lg-8">
+
+<!-- DETAILS -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data" id="ticketForm">
+      {% csrf_token %}
+
+      <fieldset id="formFields" disabled>
+        {{ form.as_p }}
+      </fieldset>
+
+      <label class="mt-3">Attachments</label>
+      <input type="file" class="form-control">
+
+      <div class="sticky-actions d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-primary" onclick="enableEdit()">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-save"></i> Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ACTIVITY -->
+<div class="card">
+  <div class="card-header"><strong>Activity Timeline</strong></div>
+  <div class="card-body timeline">
+
+    {% for comment in comments %}
+    <div class="timeline-item">
+      <small class="text-muted">{{ comment.created_at }}</small>
+      <p class="mb-1">
+        <i class="bi bi-person-circle"></i>
+        <strong>{{ comment.user }}</strong>
+        {% if comment.internal %}
+          <span class="badge bg-dark">Internal</span>
+        {% endif %}
+      </p>
+      <p>{{ comment.text }}</p>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+</div>
+
+<!-- RIGHT COLUMN -->
+<div class="col-lg-4">
+
+<div class="card mb-3">
+  <div class="card-body">
+    <p><strong>Assigned To:</strong><br> {{ ticket.assigned_to }}</p>
+    <p><strong>Priority:</strong><br>
+      <span class="priority-high">{{ ticket.priority }}</span>
+    </p>
+    <p><strong>Created:</strong><br> {{ ticket.created_at }}</p>
+    <p><strong>Updated:</strong><br> {{ ticket.updated_at }}</p>
+  </div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+function enableEdit() {
+  document.getElementById("formFields").disabled = false;
+}
+function toggleDarkMode() {
+  document.getElementById("pageBody").classList.toggle("dark-mode");
+}
+</script>
+
+</body>
+</html>

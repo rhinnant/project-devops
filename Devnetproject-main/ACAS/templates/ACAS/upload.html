@@ -1,0 +1,8 @@
+<h2>Upload Nessus Scan</h2>
+<form method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="text" name="name" placeholder="Scan Name" required><br><br>
+  <input type="file" name="file" required><br><br>
+  <button type="submit">Upload</button>
+</form>
+

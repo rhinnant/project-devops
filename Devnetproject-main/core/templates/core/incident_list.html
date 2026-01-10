@@ -1,0 +1,9 @@
+<h1>Incidents</h1>
+<a href="{% url 'incident-create' %}">Create New Incident</a>
+<ul>
+{% for incident in object_list %}
+    <li>
+        <a href="{% url 'incident-detail' incident.id %}">{{ incident.title }}</a> - {{ incident.status }}
+    </li>
+{% endfor %}
+</ul>
