@@ -27,3 +27,6 @@ env/
 .DS_Store
 Thumbs.db
 
+*.deb
+minikube-linux-amd64
+*.hpi
