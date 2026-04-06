@@ -80,17 +80,16 @@ WSGI_APPLICATION = 'it_dashboard.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'my_it_dashboard',
-        'USER': 'tele',
-        'PASSWORD': '2wsx3edc@WSX#EDC',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',  # This file will be created automatically
     }
 }
-
 
 
 # Password validation
