@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enterprise Knowledge Base</title>
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+  /* Reset some default styles */
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+    color: #333;
+  }
+
+  /* Header */
+  header {
+    background-color: #2d3e50;
+    padding: 30px 40px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* Search */
+  .search-box {
+    display: flex;
+    width: 100%;
+    max-width: 600px;
+    margin-bottom: 30px;
+  }
+  .search-box input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 4px 0 0 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus {
+    border-color: #0052cc;
+  }
+  .search-box button {
+    padding: 14px 20px;
+    background-color: #0052cc;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .search-box button:hover {
+    background-color: #003d99;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .tab {
+    padding: 10px 20px;
+    background-color: #e0e1e2;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s, color 0.2s;
+  }
+  .tab.active {
+    background-color: #0052cc;
+    color: #fff;
+  }
+  .tab:hover {
+    background-color: #d0d2d6;
+  }
+
+  /* Articles Grid */
+  .articles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+  }
+
+  /* Article Card */
+  .article {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .article:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  .article h2 {
+    font-size: 18px;
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .article p {
+    font-size: 14px;
+    color: #555;
+  }
+  .article a {
+    display: inline-block;
+    margin-top: 12px;
+    font-weight: 600;
+    color: #0052cc;
+    text-decoration: none;
+  }
+  .article a:hover {
+    text-decoration: underline;
+  }
+  .meta {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    padding-top: 60px;
+  }
+  .modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.2s;
+  }
+  .close:hover {
+    color: #000;
+  }
+
+  /* Knowledge Sharing Section */
+  .knowledge-section {
+    margin-top: 50px;
+  }
+  .knowledge-section h2 {
+    margin-bottom: 16px;
+    font-size: 22px;
+    color: #2d3e50;
+  }
+  #knowledgeForm {
+    display: flex;
+    flex-direction: column;
+  }
+  #knowledgeForm label {
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  #knowledgeInput {
+    padding: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    min-height: 100px;
+    font-size: 15px;
+  }
+  #knowledgeForm button {
+    margin-top: 12px;
+    width: fit-content;
+    padding: 14px 20px;
+    background-color: #0052cc;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  #knowledgeForm button:hover {
+    background-color: #003d66;
+  }
+  #submissionResult {
+    margin-top: 12px;
+    font-weight: 600;
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 60px;
+    padding: 20px 0;
+    background-color: #2d3e50;
+    color: #ccc;
+    text-align: center;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><i class="fa-solid fa-briefcase"></i> Enterprise Knowledge Base</h1>
+</header>
+
+<div class="container">
+
+  <!-- Search -->
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search articles..." />
+    <button id="searchBtn"><i class="fa fa-search"></i></button>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-category="all">All</div>
+    <div class="tab" data-category="accounts">Accounts</div>
+    <div class="tab" data-category="tickets">Tickets</div>
+    <div class="tab" data-category="faq">FAQ</div>
+  </div>
+
+  <!-- Articles -->
+  <div class="articles" id="articlesContainer">
+    <!-- Example Articles -->
+    <div class="article" data-category="accounts">
+      <h2>
+        <i class="fa-solid fa-file-lines"></i> How to Create an Account
+      </h2>
+      <p>Learn how to create a new account on our platform with step-by-step instructions and tips.</p>
+      <a href="#" class="read-more">Read more →</a>
+      <div class="meta">
+        <i class="fa fa-clock"></i> Updated recently
+      </div>
+    </div>
+    <div class="article" data-category="tickets">
+      <h2>
+        <i class="fa-solid fa-file-lines"></i> Ticket Submission Guide
+      </h2>
+      <p>Submit support tickets easily with our comprehensive guide to ensure quick resolutions.</p>
+      <a href="#" class="read-more">Read more →</a>
+      <div class="meta">
+        <i class="fa fa-clock"></i> Updated recently
+      </div>
+    </div>
+    <div class="article" data-category="faq">
+      <h2>
+        <i class="fa-solid fa-file-lines"></i> Frequently Asked Questions
+      </h2>
+      <p>Find answers to common questions about our services, policies, and troubleshooting tips.</p>
+      <a href="#" class="read-more">Read more →</a>
+      <div class="meta">
+        <i class="fa fa-clock"></i> Updated recently
+      </div>
+    </div>
+    <div class="article" data-category="accounts">
+      <h2>
+        <i class="fa-solid fa-file-lines"></i> Reset Password
+      </h2>
+      <p>Learn how to reset your password securely and regain access to your account.</p>
+      <a href="#" class="read-more">Read more →</a>
+      <div class="meta">
+        <i class="fa fa-clock"></i> Updated recently
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Your Knowledge -->
+  <div class="knowledge-section">
+    <h2>Share Your Knowledge</h2>
+    <form id="knowledgeForm">
+      <label for="knowledgeInput">Write your knowledge or feedback:</label>
+      <textarea id="knowledgeInput" placeholder="Share your tips, knowledge, or feedback..."></textarea>
+      <button type="submit">Submit</button>
+    </form>
+    <div id="submissionResult"></div>
+  </div>
+
+</div>
+
+<!-- Article Modal -->
+<div id="articleModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p id="modalContent"></p>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  &copy; <span id="year"></span> Enterprise Solutions Inc.
+</footer>
+
+<script>
+  // Set current year
+  document.getElementById('year').innerText = new Date().getFullYear();
+
+  // Elements
+  const articles = document.querySelectorAll('.articles .article');
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const modal = document.getElementById('articleModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalContent = document.getElementById('modalContent');
+  const closeModal = document.querySelector('.close');
+
+  // Category filtering
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const category = tab.getAttribute('data-category');
+      articles.forEach(article => {
+        if (category === 'all' || article.getAttribute('data-category') === category) {
+          article.style.display = '';
+        } else {
+          article.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Search filtering
+  function filterArticles() {
+    const query = searchInput.value.toLowerCase();
+    articles.forEach(article => {
+      const title = article.querySelector('h2').innerText.toLowerCase();
+      const content = article.querySelector('p').innerText.toLowerCase();
+      if (title.includes(query) || content.includes(query)) {
+        article.style.display = '';
+      } else {
+        article.style.display = 'none';
+      }
+    });
+  }
+
+  searchBtn.addEventListener('click', () => {
+    filterArticles();
+  });
+  searchInput.addEventListener('keyup', () => {
+    filterArticles();
+  });
+
+  // Read more opens modal
+  document.querySelectorAll('.read-more').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const article = link.closest('.article');
+      const title = article.querySelector('h2').innerText;
+      const content = article.querySelector('p').innerText;
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalContent').innerText = content;
+      modal.style.display = 'block';
+    });
+  });
+
+  // Close modal
+  closeModal.onclick = () => {
+    modal.style.display = 'none';
+  };
+  window.onclick = (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  };
+
+  // Handle "Share Your Knowledge" form submission
+  document.getElementById('knowledgeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('knowledgeInput').value.trim();
+    const resultDiv = document.getElementById('submissionResult');
+
+    if (input) {
+      resultDiv.innerText = "Thank you for sharing!";
+      resultDiv.style.color = 'green';
+      document.getElementById('knowledgeInput').value = '';
+    } else {
+      resultDiv.innerText = "Please write something before submitting.";
+      resultDiv.style.color = 'red';
+    }
+  });
+</script>
+
+</body>
+</html>

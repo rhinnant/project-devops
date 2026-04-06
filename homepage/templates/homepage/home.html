@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Devnet Enterprise Dashboard</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    background: linear-gradient(135deg, #0f264d, #1a3d66);
+    padding: 20px 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .logo-svg {
+    width: 70px;
+    height: 70px;
+  }
+
+  .logo-text {
+    color: #fff;
+  }
+
+  .logo-text h1 {
+    font-size: 2em;
+    font-weight: 700;
+  }
+
+  /* User/action buttons */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+  }
+
+  /* Hero banner with overlay */
+  .hero {
+    background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80') no-repeat center center/cover;
+    height: 400px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(15, 38, 77, 0.6);
+  }
+
+  .hero-content {
+    position: relative;
+    text-align: center;
+    padding: 0 20px;
+  }
+
+  .hero-content h2 {
+    font-size: 3em;
+    margin-bottom: 15px;
+  }
+
+  .hero-content p {
+    font-size: 1.2em;
+  }
+
+  /* Navigation menu (multi-tier) */
+  nav {
+    display: flex;
+    justify-content: center;
+    background-color: #fff;
+    padding: 15px 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  nav ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+  }
+
+  nav ul li {
+    position: relative;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: #0f264d;
+    font-weight: 600;
+    font-size: 1em;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+
+  nav a:hover {
+    background-color: #e0e0e0;
+  }
+
+  /* Dropdown submenu */
+  nav li:hover > ul {
+    display: flex;
+  }
+
+  nav ul ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #fff;
+    flex-direction: column;
+    min-width: 180px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border-radius: 4px;
+    z-index: 10;
+  }
+
+  nav ul ul li {
+    width: 100%;
+  }
+
+  /* Main content grid */
+  .cards {
+    max-width: 1200px;
+    margin: 50px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 0 20px;
+  }
+
+  /* Card styles with layered overlay and hover effects */
+  .card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+  }
+
+  /* Icon at top of card */
+  .card-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .card-header i {
+    font-size: 2.5em;
+    color: #007bff;
+  }
+
+  /* Card title and description */
+  .card h3 {
+    color: #0f264d;
+    margin-bottom: 15px;
+    text-align: center;
+  }
+
+  .card p {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  /* Call-to-action buttons with layered effects */
+  .card .btn {
+    padding: 14px 28px;
+    margin-top: auto;
+    align-self: center;
+    font-size: 1em;
+  }
+
+  /* Footer styles */
+  footer {
+    background-color: #0f264d;
+    color: #ccc;
+    padding: 30px 20px;
+    text-align: center;
+    margin-top: 50px;
+  }
+
+  /* Responsive adjustments */
+  @media(max-width: 768px) {
+    header {
+      flex-direction: column;
+      align-items: center;
+    }
+    .logo-section {
+      flex-direction: column;
+      align-items: center;
+    }
+    nav {
+      flex-direction: column;
+      align-items: center;
+    }
+    nav ul {
+      flex-direction: column;
+      gap: 15px;
+    }
+    .hero {
+      height: 250px;
+    }
+    .hero h2 {
+      font-size: 2em;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-section">
+    <!-- Logo SVG -->
+    <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#fff">
+      <rect x="8" y="12" width="48" height="24" rx="2" ry="2" stroke="#fff" stroke-width="2"/>
+      <rect x="16" y="36" width="32" height="4"/>
+      <rect x="24" y="44" width="16" height="4"/>
+    </svg>
+    <div class="logo-text">
+      <h1>Devnet Enterprise</h1>
+    </div>
+  </div>
+  <div class="header-actions">
+    
+  </div>
+</header>
+
+<!-- Hero Banner -->
+<div class="hero">
+  <div class="hero-content">
+    <h2>Transforming Enterprise Support & Management</h2>
+    <p>Unified platform for support tickets, asset management, knowledge base, and user settings designed for large organizations.</p>
+  </div>
+</div>
+
+<!-- Navigation Menu -->
+<nav>
+  <ul>
+    
+    <li>
+      
+    </li>
+    <li>
+      
+    </li>
+    <li>
+      <a href="/assets/"><i class="fas fa-boxes"></i> Assets</a>
+      <a href="/network/"><i class="fas fa-boxes"></i> network</a>
+    </li>
+    <li>
+      <a href="/notifications/"><i class="fas fa-bell"></i> Notifications</a>
+    </li>
+    <li>
+      <a href="http://127.0.0.1:8000/knowledge/"><i class="fas fa-lightbulb"></i> Knowledge Base</a>
+    </li>
+    <li>
+      
+
+    </li>
+  </ul>
+</nav>
+
+<!-- Main Cards -->
+<div class="cards">
+  <div class="card">
+    <div class="card-header"><i class="fas fa-headset"></i></div>
+    <h3>Request Support</h3>
+    <p>Submit support tickets, browse FAQs, and get help quickly with our enterprise-grade support system.</p>
+    <a href="http://127.0.0.1:8000/tickets/" class="btn btn-primary">Tickets</a>
+    <a href="/departments/" class="btn btn-primary" style="margin-top:10px;">Departments</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><i class="fas fa-tasks"></i></div>
+    <h3>Tracking</h3>
+    <p>Monitor the status with real-time updates and detailed insights.</p>
+    <a href="http://127.0.0.1:8000/view_request/" class="btn btn-primary">View Requests</a>
+    <a href="http://127.0.0.1:8000/network" class="btn btn-primary">network Monitor</a>
+  </div>
+  <div class="card">
+    <div class="card-header"><i class="fas fa-book"></i></div>
+    <h3>Knowledge Base</h3>
+    <p>Access a comprehensive library of solutions, guides, and FAQs tailored for enterprise needs.</p>
+    
+  </div>
+  <div class="card">
+    <div class="card-header"><i class="fas fa-user-cog"></i></div>
+    <h3>Account Settings</h3
+
+
+    <p>Manage your profile, user preferences, and notifications in a secure environment.</p>
+    <a href="#" class="btn btn-primary">accounts</a>
+    <a href="/accounts/"><button type="button">settings</button></a>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  &copy; 2024 Devnet Inc. | All rights reserved.
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Fully Functional Notifications Center</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+  }
+  #themeToggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    background: none;
+    border: 2px solid #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  #controls {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 40px;
+    margin-bottom: 10px;
+  }
+  #filterGroup button {
+    margin-right: 5px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: #2196f3;
+    color: #fff;
+  }
+  #filterGroup button:hover {
+    background-color: #1976d2;
+  }
+  #notifications {
+    max-height: 70vh;
+    overflow-y: auto;
+    border: 1px solid #444;
+    background: #222;
+    padding: 10px;
+    border-radius: 8px;
+    position: relative;
+  }
+  .notification {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin: 4px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    border-left: 4px solid transparent;
+    transition: background 0.2s, border-left-color 0.2s;
+  }
+  .notification:hover {
+    background: #333;
+  }
+  /* Category colors */
+  .category-info { border-left-color: #2196f3; }
+  .category-warning { border-left-color: #ff9800; }
+  .category-error { border-left-color: #f44336; }
+  .category-low { border-left-color: #4caf50; }
+  .category-medium { border-left-color: #ffeb3b; color:#000; background:#fff; }
+  .category-high { border-left-color: #f44336; }
+  /* Buttons inside notification */
+  .notif-btn {
+    background: transparent;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 1.2em;
+  }
+  .notif-btn:hover {
+    color: #fff;
+  }
+  /* Modal styles */
+  #notificationModal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+  }
+  #modalContent {
+    background: #fff; color: #000; padding: 20px; border-radius: 8px; width: 80%; max-width: 600px; position: relative;
+  }
+  #closeModal {
+    position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 1.5em;
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<button id="themeToggle">🌙 Switch Theme</button>
+
+<h1>🔔 Notifications Center</h1>
+
+<div id="controls">
+  <div id="filterGroup">
+    <button onclick="filterCategory('all')">All</button>
+    <button onclick="filterCategory('info')">Info</button>
+    <button onclick="filterCategory('warning')">Warning</button>
+    <button onclick="filterCategory('error')">Error</button>
+    <button onclick="filterCategory('low')">Low</button>
+    <button onclick="filterCategory('medium')">Medium</button>
+    <button onclick="filterCategory('high')">High</button>
+  </div>
+  <div>
+    <button onclick="markAllRead()">Mark All Read</button>
+    <button onclick="exportNotifications()">Export</button>
+    <button onclick="clearAll()">Clear All</button>
+  </div>
+</div>
+
+<input type="text" id="searchInput" placeholder="Search notifications..." />
+
+<div id="notifications"></div>
+
+<!-- Notification Details Modal -->
+<div id="notificationModal">
+  <div id="modalContent">
+    <span id="closeModal">&times;</span>
+    <h3>Notification Details</h3>
+    <div id="modalText"></div>
+    <button onclick="copyDetails()">Copy Details</button>
+  </div>
+</div>
+
+<script>
+// Variables
+const notifContainer = document.getElementById('notifications');
+const searchInput = document.getElementById('searchInput');
+const modal = document.getElementById('notificationModal');
+const modalText = document.getElementById('modalText');
+
+let notifications = [];
+let currentFilter = 'all';
+
+// WebSocket connection
+const socket = new WebSocket('ws://' + window.location.host + '/ws/notifications/');
+
+// For testing/demo, you can uncomment below to simulate notifications
+/*
+let demoInterval = setInterval(() => {
+  const categories = ['info', 'warning', 'error', 'low', 'medium', 'high'];
+  const category = categories[Math.floor(Math.random() * categories.length)];
+  addNotification('Demo message ' + Date.now(), category, 'This is a demo notification.', category==='error'?'high':category==='warning'?'medium':'low');
+  playSound();
+}, 15000);
+*/
+
+// Handle incoming messages
+socket.onmessage = e => {
+  try {
+    const data = JSON.parse(e.data);
+    addNotification(data.message, data.category || 'info', data.details || '', data.priority || 'medium', data.pinned || false);
+    playSound();
+  } catch(e) {
+    console.log('Invalid message', e);
+  }
+};
+
+socket.onclose = () => {
+  addNotification('Connection closed. Refresh to reconnect.', 'warning');
+};
+
+// Add notification
+function addNotification(msg, category='info', details='', priority='medium', pinned=false) {
+  const n = {
+    id: Date.now() + Math.random(),
+    message: msg,
+    category,
+    details,
+    priority,
+    pinned,
+    timestamp: new Date().toLocaleString(),
+    read: false
+  };
+  notifications.push(n);
+  render();
+}
+
+// Render notifications based on filters/search
+function render() {
+  notifContainer.innerHTML = '';
+
+  let filtered = notifications;
+
+  if(currentFilter !== 'all') {
+    filtered = filtered.filter(n => n.category===currentFilter);
+  }
+
+  if(searchInput.value.trim() !== '') {
+    const q = searchInput.value.toLowerCase();
+    filtered = filtered.filter(n => n.message.toLowerCase().includes(q));
+  }
+
+  // Show latest first
+  filtered.slice().reverse().forEach(n => {
+    const div = document.createElement('div');
+    div.className = `notification category-${n.category} priority-${n.priority}`;
+    div.innerHTML = `
+      <div onclick="showDetails('${n.id}')">
+        <strong>[${capitalize(n.category)}]</strong> ${n.message}
+        <br/><small>${n.timestamp}</small>
+      </div>
+      <div>
+        <button class="notif-btn" onclick="deleteNotification('${n.id}'); event.stopPropagation();">🗑️</button>
+        <button class="notif-btn" onclick="pinNotification('${n.id}'); event.stopPropagation();">${n.pinned ? '📌' : '📍'}</button>
+      </div>
+    `;
+    notifContainer.appendChild(div);
+  });
+  notifContainer.scrollTop = notifContainer.scrollHeight;
+}
+
+// Filter and actions
+function filterCategory(cat) {
+  currentFilter=cat;
+  render();
+}
+function markAllRead() {
+  notifications.forEach(n => n.read=true);
+  render();
+}
+function deleteNotification(id) {
+  notifications = notifications.filter(n => n.id!==id);
+  render();
+}
+function pinNotification(id) {
+  const n = notifications.find(n=>n.id===id);
+  if(n) n.pinned = !n.pinned;
+  render();
+}
+function showDetails(id) {
+  const n = notifications.find(n=>n.id===id);
+  if(n) {
+    document.getElementById('modalText').innerHTML = `
+      <p><strong>Message:</strong> ${n.message}</p>
+      <p><strong>Category:</strong> ${n.category}</p>
+      <p><strong>Priority:</strong> ${n.priority}</p>
+      <p><strong>Timestamp:</strong> ${n.timestamp}</p>
+      <p><strong>Details:</strong> ${n.details}</p>
+    `;
+    modal.style.display='flex';
+  }
+}
+function copyDetails() {
+  const text = document.getElementById('modalText').innerText;
+  navigator.clipboard.writeText(text).then(()=> alert('Copied!'));
+}
+document.getElementById('closeModal').onclick = () => { modal.style.display='none'; };
+window.onclick = e => { if(e.target===modal) modal.style.display='none'; };
+
+function filterCategory(cat) { currentFilter=cat; render(); }
+function clearAll() { notifications=[]; render(); }
+function exportNotifications() {
+  const dataStr = JSON.stringify(notifications, null, 2);
+  const blob = new Blob([dataStr], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='notifications.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+function playSound() {
+  const sound = new Audio('https://notificationsounds.com/storage/sound/file-sound-1262.mp3');
+  sound.play();
+}
+
+// Theme toggle
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.onclick = () => {
+  const current = document.body.getAttribute('data-theme');
+  const newTheme = current==='dark'?'light':'dark';
+  document.body.setAttribute('data-theme', newTheme);
+  themeBtn.innerText = newTheme==='dark'?'🌙':'☀️';
+};
+
+// Initial demo message (optional)
+// Uncomment below for demo
+/*
+setTimeout(()=> {
+  addNotification("Welcome! Notifications enabled.", "info", "This is your notifications center.", "medium");
+}, 1000);
+*/
+</script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Devnet Network Monitor Dashboard</title>
+
+<!-- Libraries -->
+<script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+<script src="https://unpkg.com/cytoscape-qtip/dist/cytoscape-qtip.min.js"></script>
+<script src="https://unpkg.com/cytoscape-minimap/cytoscape-minimap.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<style>
+:root {
+  --bg: #0f172a; --panel: #111827; --text: #e5e7eb;
+  --muted: #9ca3af; --accent: #2563eb; --up: #16a34a;
+  --down: #dc2626; --warn: #f59e0b; --ai: #facc15;
+}
+body {
+  margin: 0; font-family: Inter, system-ui, Arial;
+  background: var(--bg); color: var(--text);
+  display: grid; grid-template-columns: 280px 1fr;
+  grid-template-rows: 64px 1fr; height: 100vh;
+}
+header {
+  grid-column: 1 / -1; background: #020617;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px; font-size: 1.4em; font-weight: 600;
+  border-bottom: 1px solid #1f2933;
+}
+aside {
+  background: var(--panel); padding: 16px; border-right: 1px solid #1f2933;
+  display: flex; flex-direction: column; overflow-y: auto;
+}
+aside h3 { margin-top: 0; font-size: 1em; border-bottom: 1px solid #1f2933; padding-bottom: 6px; }
+.stat { margin: 10px 0; font-size: 0.9em; }
+.legend span { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.up { background: var(--up); } .down { background: var(--down); } .warn { background: var(--warn); } .ai { background: var(--ai); }
+input { width: 100%; padding: 8px; background: #020617; border: 1px solid #1f2933; color: var(--text); border-radius: 6px; margin-bottom: 10px; }
+main { position: relative; }
+#controls { position: absolute; top: 10px; left: 10px; z-index: 10; display: flex; gap: 6px; flex-wrap: wrap; }
+button { background: #020617; border: 1px solid #1f2933; color: var(--text); padding: 6px 10px; border-radius: 6px; cursor: pointer; }
+button:hover { background: var(--accent); }
+#cy { width: 100%; height: 100%; }
+#inspector { position: absolute; bottom: 10px; right: 10px; background: var(--panel); padding: 12px; border-radius: 8px; width: 300px; font-size: 0.9em; border: 1px solid #1f2933; max-height: 400px; overflow-y: auto; }
+.chart-container { width: 100%; height: 150px; margin-top: 10px; }
+.ai-suggestion { background: var(--ai); padding: 4px; border-radius: 4px; margin: 4px 0; color: #000; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>Devnet Network Automation Dashboard</div>
+  <div id="roleSelector">
+    <select id="roleSelect">
+      <option value="admin">Admin</option>
+      <option value="support">Support</option>
+      <option value="customer">Customer</option>
+    </select>
+  </div>
+</header>
+
+<aside>
+  <h3>Overview</h3>
+  <div class="stat">Active Alarms: <strong id="alarmCount">0</strong></div>
+  <h3>Search Devices</h3>
+  <input id="search" placeholder="Search device..." />
+  <h3>Status</h3>
+  <div class="legend">
+    <span><div class="dot up"></div> Up</span>
+    <span><div class="dot down"></div> Down</span>
+    <span><div class="dot warn"></div> Warning</span>
+    <span><div class="dot ai"></div> Predicted Issue</span>
+  </div>
+  <h3>Alarms & AI Suggestions</h3>
+  <div id="alarmsList"></div>
+</aside>
+
+<main>
+  <div id="controls">
+    <button onclick="setLayout('cose')">Auto</button>
+    <button onclick="setLayout('breadthfirst')">Hierarchy</button>
+    <button onclick="cy.fit()">Fit</button>
+    <button onclick="exportPNG()">Export PNG</button>
+    <button onclick="simulateFailure()">Simulate Failure</button>
+    <button onclick="runAIPredict()">Run AI Predict</button>
+    <!-- Add refresh button -->
+    <button onclick="loadNetworkTopology()">Refresh Topology</button>
+  </div>
+  <div id="cy"></div>
+  <div id="inspector">
+    <strong>Device Details</strong>
+    <div id="details">Click a device to inspect</div>
+    <div class="chart-container"><canvas id="trendChart"></canvas></div>
+  </div>
+</main>
+
+<script>
+// Static initial data
+const initialElements = {
+  nodes: [
+    { data: { id: 'core', label: 'Core Router', type: 'router', status: 'up', cpu: 35, mem: 50 } },
+    { data: { id: 'dist1', label: 'Distribution 1', type: 'switch', status: 'up', cpu: 20, mem: 30 } },
+    { data: { id: 'dist2', label: 'Distribution 2', type: 'switch', status: 'down', cpu: 90, mem: 70 } },
+    { data: { id: 'srv', label: 'App Server', type: 'server', status: 'up', cpu: 50, mem: 60 } },
+    { data: { id: 'db', label: 'DB Server', type: 'server', status: 'down', cpu: 95, mem: 80 } },
+    { data: { id: 'pc', label: 'User Workstation', type: 'host', status: 'up', cpu: 10, mem: 20 } }
+  ],
+  edges: [
+    { data: { source: 'core', target: 'dist1' } },
+    { data: { source: 'core', target: 'dist2' } },
+    { data: { source: 'dist1', target: 'srv' } },
+    { data: { source: 'dist2', target: 'db' } },
+    { data: { source: 'dist1', target: 'pc' } }
+  ]
+};
+
+// Initialize Cytoscape
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements: initialElements,
+  style: [
+    { selector: 'node', style: {
+        label: 'data(label)', 'text-valign': 'center', 'color': '#fff', width: 80, height: 50,
+        shape: 'round-rectangle',
+        'background-color': ele =>
+          ele.data('status')==='down'?'#7f1d1d':ele.data('ai')?'#facc15':
+          ele.data('type')==='router'?'#2563eb':
+          ele.data('type')==='switch'?'#16a34a':
+          ele.data('type')==='server'?'#7c3aed':'#f97316',
+        'border-width': ele=>ele.data('status')==='down'?4:2,
+        'border-color': ele=>ele.data('status')==='down'?'#dc2626':'#020617'
+      }},
+    { selector: 'edge', style: { width: 2, 'line-color': '#475569' } },
+    { selector: 'edge.down', style: { 'line-color': '#dc2626' } }
+  ]
+});
+cy.minimap();
+
+// Trend Chart
+const trendCtx = document.getElementById('trendChart').getContext('2d');
+let trendChart = new Chart(trendCtx, {
+  type: 'line',
+  data: { labels: [], datasets: [{ label: 'CPU', data: [], borderColor: '#2563eb', fill: false }] },
+  options: { responsive: true, plugins: { legend: { display: true } } }
+});
+
+// Node click shows details and update trend
+cy.on('tap', 'node', e => {
+  const d = e.target.data();
+  document.getElementById('details').innerHTML = `<strong>${d.label}</strong><br/>Type: ${d.type}<br/>Status: <b>${d.status.toUpperCase()}</b><br/>CPU: ${d.cpu}%<br/>Memory: ${d.mem}%<br/><button onclick="remoteAccess('${d.id}')">Remote Access</button>`;
+  updateTrendChart(d);
+});
+
+function updateTrendChart(node) {
+  trendChart.data.labels = Array.from({ length: 10 }, (_, i) => i);
+  trendChart.data.datasets[0].data = Array.from({ length: 10 }, () => node.cpu + Math.floor(Math.random() * 10 - 5));
+  trendChart.update();
+}
+
+// Search filter
+document.getElementById('search').addEventListener('input', e => {
+  const q = e.target.value.toLowerCase();
+  cy.nodes().forEach(n => n.style('opacity', n.data('label').toLowerCase().includes(q) ? 1 : 0.2));
+});
+
+// Alarm & AI suggestions
+function updateAlarms() {
+  let alarms = 0; 
+  const alarmsEl = document.getElementById('alarmsList');
+  alarmsEl.innerHTML = '';
+  cy.nodes().forEach(n => {
+    if (n.data('status')==='down') {
+      alarms++;
+      alarmsEl.innerHTML += `<div><b>${n.data('label')}:</b> ${generateSuggestion(n)}</div>`;
+    }
+    if (n.data('ai')) {
+      alarmsEl.innerHTML += `<div class="ai-suggestion"><b>${n.data('label')}:</b> Predicted issue: ${n.data('ai')}</div>`;
+    }
+  });
+  document.getElementById('alarmCount').innerText = alarms;
+}
+function generateSuggestion(node){
+  if(node.data('type')==='switch') return 'Check uplink port';
+  if(node.data('type')==='server') return 'Restart service';
+  if(node.data('type')==='router') return 'Check routing table';
+  return 'Inspect device';
+}
+updateAlarms();
+
+// Export PNG
+function exportPNG() { saveAs(dataURLtoBlob(cy.png({full:true})), 'topology.png'); }
+function dataURLtoBlob(dataurl) {
+  const arr = dataurl.split(','), bstr=atob(arr[1]);
+  return new Blob([Uint8Array.from(bstr, c => c.charCodeAt(0))]);
+}
+
+// Layout change
+function setLayout(name) { cy.layout({ name, animate: true }).run(); }
+
+// Placeholder for remote access
+function remoteAccess(nodeId) { alert(`Launching remote session to ${nodeId}`); }
+
+// Simulate failure
+function simulateFailure() {
+  const nodes = cy.nodes();
+  const node = nodes[Math.floor(Math.random() * nodes.length)];
+  node.data('status', 'down');
+  node.style('border-color', '#dc2626');
+  updateAlarms();
+}
+
+// AI prediction heuristic
+function runAIPredict() {
+  cy.nodes().forEach(n => {
+    n.data('ai', null);
+    if (Math.random() < 0.3 && n.data('status')==='up') n.data('ai', 'High CPU load predicted');
+  });
+  updateAlarms();
+}
+
+// Role-based filtering
+document.getElementById('roleSelect').addEventListener('change', e => {
+  const role = e.target.value;
+  cy.nodes().forEach(n => {
+    if (role==='customer' && (n.data('type')==='router' || n.data('type')==='switch'))
+      n.style('display', 'none');
+    else 
+      n.style('display', 'element');
+  });
+});
+
+// Fetch and load data from API
+async function loadNetworkTopology() {
+  try {
+    const response = await fetch('/api/topology/'); // Use your API URL
+    const data = await response.json();
+
+    // Remove existing elements
+    cy.elements().remove();
+
+    // Add new data
+    cy.add(data.nodes);
+    cy.add(data.edges);
+
+    // Run layout
+    cy.layout({ name: 'cose', padding: 50 }).run();
+
+    updateAlarms();
+
+  } catch (error) {
+    console.error('Error fetching topology:', error);
+  }
+}
+
+// Load data on page load
+window.onload = () => {
+  loadNetworkTopology();
+};
+</script>
+</body>
+</html>

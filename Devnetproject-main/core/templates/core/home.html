@@ -1,3 +1,55 @@
-<h1>Welcome to the ITSM Core Module</h1>
-<p>Select an incident or create a new one.</p>
-<a href="{% url 'incident-list' %}">View Incidents</a>
+{% extends "base.html" %}
+
+{% block title %}ITSM Core Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-5">ITSM Core Module</h1>
+        <a href="{% url 'incident-create' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> Create New Incident
+        </a>
+    </div>
+
+    <!-- Welcome Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Welcome to your IT Service Management Dashboard</h5>
+            <p class="card-text text-muted">
+                Track, manage, and escalate incidents efficiently. Use the options below to view incidents or create new ones.
+            </p>
+            <a href="{% url 'incident-list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-journal-check"></i> View Incidents
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row text-center">
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light shadow-sm p-3">
+                <h6>Open Incidents</h6>
+                <h3 class="text-danger">{{ open_incidents_count }}</h3>
+                <a href="{% url 'incident-list' %}?status=Open" class="btn btn-sm btn-outline-secondary mt-2">View Open</a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light shadow-sm p-3">
+                <h6>In Progress</h6>
+                <h3 class="text-warning">{{ in_progress_incidents_count }}</h3>
+                <a href="{% url 'incident-list' %}?status=In+Progress" class="btn btn-sm btn-outline-secondary mt-2">View In Progress</a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card bg-light shadow-sm p-3">
+                <h6>Closed Incidents</h6>
+                <h3 class="text-success">{{ closed_incidents_count }}</h3>
+                <a href="{% url 'incident-list' %}?status=Closed" class="btn btn-sm btn-outline-secondary mt-2">View Closed</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

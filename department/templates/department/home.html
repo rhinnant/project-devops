@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DevNet Services</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: #e0e7ef;
+    color: #222;
+  }
+  /* Header with naval background */
+  header {
+    background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+    background-size: cover;
+    background-position: center;
+    padding: 30px 20px;
+    text-align: center;
+    position: relative;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0,0,50,0.6);
+  }
+  header img.logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    height: 60px;
+    border-radius: 8px;
+    z-index: 1;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+  }
+  header p {
+    margin-top: 10px;
+    font-size: 1.2em;
+    color: #ddd;
+    position: relative;
+    z-index: 1;
+  }
+  /* Navigation bar with ship icons */
+  nav {
+    display: flex;
+    justify-content: center;
+    background-color: #001f3f;
+    flex-wrap: wrap;
+    padding: 10px 0;
+  }
+  nav a {
+    color: #fff;
+    padding: 10px 15px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    margin: 5px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+  nav a:hover {
+    background-color: #000f3f;
+  }
+  nav a img {
+    margin-right: 8px;
+    height: 20px;
+  }
+  /* Main content styles */
+  main {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  section {
+    margin-bottom: 50px;
+  }
+  h2 {
+    color: #003366;
+    border-bottom: 2px solid #555;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    display: flex;
+    align-items: center;
+  }
+  h2 img {
+    margin-right: 10px;
+    height: 24px;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  ul li {
+    background: #fff;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+  }
+  ul li img {
+    margin-right: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+  a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  /* Weather panel styling */
+  #weather {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  /* Decorative divider with navy pattern */
+  hr {
+    border: none;
+    height: 4px;
+    background: url('https://images.unsplash.com/photo-1549924231-f129b911e442?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80') repeat-x;
+    margin: 50px 0;
+  }
+  /* Responsive adjustments */
+  @media(max-width: 768px) {
+    header h1 { font-size: 2em; }
+    h2 { font-size: 1.5em; }
+    nav { flex-direction: column; align-items: center; }
+    nav a { padding: 12px; width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Replace src with your warship/naval logo -->
+  <img src="https://images.unsplash.com/photo-1549887534-7c68088849d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Warship Logo" class="logo" />
+  <h1>DevNet - Helpdesk</h1>
+  <p>Support</p>
+</header>
+
+<nav>
+  <!-- Replace icons with naval or ship-themed icons -->
+  <a href="#services"><img src="https://img.icons8.com/ios-filled/24/ffffff/ship.png" alt="Services" />Services</a>
+  <a href="#support"><img src="https://img.icons8.com/ios-filled/24/ffffff/lifebuoy.png" alt="Support" />Support</a>
+  <a href="#resources"><img src="https://img.icons8.com/ios-filled/24/ffffff/battleship.png" alt="Resources" />Resources</a>
+  <a href="#weather"><img src="https://img.icons8.com/ios-filled/24/ffffff/cloud-sun.png" alt="Weather" />Weather</a>
+  <a href="#contact"><img src="https://img.icons8.com/ios-filled/24/ffffff/anchor.png" alt="Contact" />Contact</a>
+</nav>
+
+<main>
+  <section id="services">
+    <h2><img src="https://img.icons8.com/ios-filled/24/003366/ship-wheel.png" alt="Services" />Our Services</h2>
+    <ul>
+      <li><img src="https://img.icons8.com/ios-filled/40/2ecc71/repair.png" alt="Support" />Technical Support & Troubleshooting</li>
+      <li><img src="https://img.icons8.com/ios-filled/40/3498db/computer.png" alt="Hardware" />Hardware & Software Assistance</li>
+      <li><img src="https://img.icons8.com/ios-filled/40/9b59b6/navigation.png" alt="Network" />Network Configuration & Security</li>
+      <li><img src="https://img.icons8.com/ios-filled/40/f39c12/lock.png" alt="Account" />Account & Access Management</li>
+      <li><img src="https://img.icons8.com/ios-filled/40/16a085/maintenance.png" alt="Maintenance" />System Maintenance & Updates</li>
+    </ul>
+  </section>
+
+  <section id="support">
+    <h2><img src="https://img.icons8.com/ios-filled/24/003366/help.png" alt="Support" />Get Support</h2>
+    <p>If you need immediate assistance, please reach out:</p>
+    <ul>
+      <li><img src="https://img.icons8.com/ios-filled/40/2980b9/email.png" alt="Email" /> Email: <a href="mailto:helpdesk@devnet.com">helpdesk@devnet.com</a></li>
+      <li><img src="https://img.icons8.com/ios-filled/40/2980b9/phone.png" alt="Phone" /> Phone: <a href="tel:+12345678900">+1 234 567 8900</a></li>
+      <li><img src="https://img.icons8.com/ios-filled/40/2980b9/ticket.png" alt="Ticket" /> Support Ticket: <a href="#">Open a Ticket</a></li>
+    </ul>
+  </section>
+
+  <section id="resources">
+    <h2><img src="https://img.icons8.com/ios-filled/24/003366/open-book.png" alt="Resources" />Resources & Documentation</h2>
+    <ul>
+      <li><a href="#">IT Policies & Procedures</a></li>
+      <li><a href="#">User Guides & Manuals</a></li>
+      <li><a href="#">Software & Tool Downloads</a></li>
+      <li><a href="#">FAQ</a></li>
+    </ul>
+  </section>
+
+  <section id="weather">
+    <h2><img src="https://img.icons8.com/ios-filled/24/003366/cloud-sun.png" alt="Weather" />Current Weather</h2>
+    <div id="weather-info">Loading weather data...</div>
+  </section>
+
+  <section id="contact">
+    <h2><img src="https://img.icons8.com/ios-filled/24/003366/anchor.png" alt="Contact" />Contact Us</h2>
+    <p>DevNet Helpdesk</p>
+    <p>Email: <a href="mailto:helpdesk@devnet.com">helpdesk@devnet.com</a></p>
+    <p>Phone: <a href="tel:+12345678900">+1 234 567 8900</a></p>
+    <p>Address: 456 Naval Drive, Harbor City, Navy State</p>
+  </section>
+</main>
+
+<!-- Weather fetch script -->
+<script>
+  const apiKey = 'YOUR_API_KEY'; // <-- Replace with your OpenWeatherMap API key
+  const city = 'Harbor City'; // Change to your city
+  const weatherDiv = document.getElementById('weather-info');
+
+  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`)
+    .then(response => {
+      if (!response.ok) throw new Error('Network response was not ok');
+      return response.json();
+    })
+    .then(data => {
+      if(data.main){
+        weatherDiv.innerHTML = `
+          <h3 style="margin-top:0;">${data.name}</h3>
+          <p style="margin:5px 0;">Temperature: ${data.main.temp} &deg;C</p>
+          <p style="margin:5px 0;">Weather: ${data.weather[0].description}</p>
+          <p style="margin:5px 0;">Humidity: ${data.main.humidity}%</p>
+        `;
+      } else {
+        weatherDiv.innerHTML = '<p>Weather data unavailable.</p>';
+      }
+    })
+    .catch(error => {
+      console.error('Weather fetch error:', error);
+      weatherDiv.innerHTML = '<p>Error loading weather data.</p>';
+    });
+</script>
+
+</body>
+</html>

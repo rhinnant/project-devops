@@ -39,6 +39,7 @@ urlpatterns = [
     path('login/', include('login.urls')),  # Include login app URLs
     path('UserProfile/', include('UserProfile.urls')),
     path('tickets/', include('tickets.urls')),
+    path('core/', include('core.urls')),   # 👈 ADD THIS
 ]
 
 # Serve uploaded files during development

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Enterprise Support Requests</title>
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #f9fafb;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  header {
+    background-color: #1f2937;
+    padding: 30px 40px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+
+  /* Filters & Controls */
+  .filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  select, button {
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  button {
+    background-color: #3b82f6;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  button:hover {
+    background-color: #2563eb;
+  }
+
+  /* Request Table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  th, td {
+    padding: 14px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+  th {
+    background-color: #f3f4f6;
+    font-weight: 600;
+  }
+  tr:hover {
+    background-color: #f9fafb;
+  }
+  /* Status badges */
+  .status-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .status-pending { background-color: #f59e0b; }
+  .status-inprogress { background-color: #3b82f6; }
+  .status-resolved { background-color: #22c55e; }
+
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+    padding-top: 60px;
+  }
+  .modal-content {
+    background: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 90%;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    position: relative;
+  }
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+  .close:hover {
+    color: #000;
+  }
+
+  /* Support request form */
+  .request-form {
+    background: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 50px;
+  }
+  .request-form h2 {
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .request-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .request-form input,
+  .request-form textarea {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+  }
+  .request-form input:focus,
+  .request-form textarea:focus {
+    border-color: #3b82f6;
+    outline: none;
+  }
+  .request-form button {
+    margin-top: 20px;
+    padding: 16px 24px;
+    background-color: #3b82f6;
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .request-form button:hover {
+    background-color: #2563eb;
+  }
+
+  /* Attachments list styling */
+  #attachmentsContainer {
+    margin-top: 10px;
+  }
+  #attachmentsContainer ul {
+    list-style: none;
+    padding: 0;
+  }
+  #attachmentsContainer li {
+    padding: 8px 12px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  #attachmentsContainer li span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Footer styles same as previous */
+  footer {
+    margin-top: 50px;
+    padding: 20px 0;
+    background-color: #1f2937;
+    color: #9ca3af;
+    text-align: center;
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><i class="fa-solid fa-headset"></i> Support Portal</h1>
+</header>
+
+<div class="container">
+
+  <!-- Support Request Form -->
+  <section class="request-form">
+    <h2><i class="fa-solid fa-plus-circle"></i> Submit a Support Request</h2>
+    <form id="supportRequestForm" enctype="multipart/form-data">
+      <label for="fullName"><i class="fa fa-user"></i> Full Name</label>
+      <input type="text" id="fullName" placeholder="Your full name" required />
+
+      <label for="email"><i class="fa fa-envelope"></i> Email Address</label>
+      <input type="email" id="email" placeholder="you@company.com" required />
+
+      <label for="issueTitle"><i class="fa fa-tag"></i> Issue Title</label>
+      <input type="text" id="issueTitle" placeholder="Brief summary" required />
+
+      <label for="description"><i class="fa fa-align-left"></i> Issue Description</label>
+      <textarea id="description" rows="6" placeholder="Detailed description" required></textarea>
+
+      <label for="attachments"><i class="fa fa-paperclip"></i> Attach Files</label>
+      <input type="file" id="attachments" multiple />
+
+      <div id="attachmentsContainer"></div>
+
+      <button type="submit"><i class="fa fa-paper-plane"></i> Submit Request</button>
+    </form>
+    <div id="submitMessage" style="margin-top:15px; font-weight:600;"></div>
+  </section>
+
+  <!-- Requests list with filter -->
+  <section>
+    <h2 style="margin-bottom:15px;">Existing Requests</h2>
+    <div class="filter-controls" style="margin-bottom:20px;">
+      <select id="statusFilter">
+        <option value="all">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="In Progress">In Progress</option>
+        <option value="Resolved">Resolved</option>
+      </select>
+      <button id="refreshBtn"><i class="fa fa-sync-alt"></i> Refresh</button>
+    </div>
+    <table id="requestsTable">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Submitted By</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+</div>
+
+<!-- Request Details Modal -->
+<div id="requestModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <p><strong>Submitted by:</strong> <span id="modalUser"></span></p>
+    <p><strong>Date:</strong> <span id="modalDate"></span></p>
+    <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+    <hr/>
+    <h3>Details</h3>
+    <p id="modalDescription"></p>
+    <div style="margin-top:20px;">
+      <strong>Attachments:</strong>
+      <ul id="attachmentList"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  &copy; <span id="year"></span> Enterprise Support Inc.
+</footer>
+
+<script>
+  // Initialize
+  document.getElementById('year').innerText = new Date().getFullYear();
+
+  // Data management
+  let requests = JSON.parse(localStorage.getItem('requests')) || [];
+  let requestIdCounter = requests.length ? Math.max(...requests.map(r => r.id)) + 1 : 1;
+
+  // Load requests into table
+  function loadRequests() {
+    const tbody = document.querySelector('#requestsTable tbody');
+    tbody.innerHTML = "";
+    requests.forEach(req => {
+      const tr = document.createElement('tr');
+      tr.setAttribute('data-status', req.status);
+      tr.setAttribute('data-id', req.id);
+      tr.innerHTML = `
+        <td>${req.title}</td>
+        <td>${req.user}</td>
+        <td>${req.date}</td>
+        <td><span class="status-badge ${statusClass(req.status)}">${req.status}</span></td>
+        <td><button class="view-btn" style="background:none; border:none; color:#3b82f6; cursor:pointer;">View</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    attachViewHandlers();
+  }
+
+  function statusClass(status) {
+    switch(status) {
+      case "Pending": return "status-pending";
+      case "In Progress": return "status-inprogress";
+      case "Resolved": return "status-resolved";
+      default: return "";
+    }
+  }
+
+  // Save to local storage
+  function saveRequests() {
+    localStorage.setItem('requests', JSON.stringify(requests));
+  }
+
+  // Filter requests
+  document.getElementById('statusFilter').addEventListener('change', () => {
+    const val = document.getElementById('statusFilter').value;
+    document.querySelectorAll('#requestsTable tbody tr').forEach(tr => {
+      if (val === 'all' || tr.getAttribute('data-status') === val) {
+        tr.style.display = '';
+      } else {
+        tr.style.display = 'none';
+      }
+    });
+  });
+
+  document.getElementById('refreshBtn').onclick = () => {
+    loadRequests();
+  };
+
+  // View request details
+  function attachViewHandlers() {
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.closest('tr').getAttribute('data-id');
+        showRequestDetails(id);
+      };
+    });
+  }
+
+  function showRequestDetails(id) {
+    const req = requests.find(r => r.id == id);
+    if (req) {
+      document.getElementById('modalTitle').innerText = req.title;
+      document.getElementById('modalUser').innerText = req.user;
+      document.getElementById('modalDate').innerText = req.date;
+      document.getElementById('modalStatus').innerText = req.status;
+      document.getElementById('modalDescription').innerText = req.description;
+      // Attachments
+      const list = document.getElementById('attachmentList');
+      list.innerHTML = "";
+      req.attachments.forEach((file, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<a href="#" style="color:#3b82f6;">${file}</a>`;
+        list.appendChild(li);
+      });
+      document.getElementById('requestModal').style.display = 'block';
+    }
+  }
+
+  document.querySelector('.close').onclick = () => {
+    document.getElementById('requestModal').style.display = 'none';
+  };
+  window.onclick = (e) => {
+    if (e.target == document.getElementById('requestModal')) {
+      document.getElementById('requestModal').style.display = 'none';
+    }
+  };
+
+  // Handle new request submission
+  document.getElementById('supportRequestForm').onsubmit = (e) => {
+    e.preventDefault();
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const title = document.getElementById('issueTitle').value.trim();
+    const description = document.getElementById('description').value.trim();
+
+    // Get files
+    const files = Array.from(document.getElementById('attachments').files);
+    const filenames = files.map(f => f.name);
+
+    if (!fullName || !email || !title || !description) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const newRequest = {
+      id: requestIdCounter++,
+      title: title,
+      user: fullName,
+      date: new Date().toISOString().split('T')[0],
+      status: "Pending",
+      description: description,
+      attachments: filenames,
+    };
+
+    requests.push(newRequest);
+    saveRequests();
+    loadRequests();
+
+    // Reset form
+    document.getElementById('supportRequestForm').reset();
+    document.getElementById('attachmentsContainer').innerHTML = "";
+    document.getElementById('submitMessage').innerText = "Request submitted!";
+    document.getElementById('submitMessage').style.color = "green";
+  };
+
+  // Show attachment filenames
+  document.getElementById('attachments').onchange = () => {
+    const files = Array.from(document.getElementById('attachments').files);
+    const container = document.getElementById('attachmentsContainer');
+    container.innerHTML = "";
+    files.forEach(file => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span><i class="fa fa-file"></i> ${file.name}</span>`;
+      container.appendChild(li);
+    });
+  };
+
+  // Initialize table
+  loadRequests();
+</script>
+
+</body>
+</html>
+
