@@ -16,20 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('homepage.urls')),
     path('', include('knowledge.urls')),
     path('', include('homepage.urls')),
-    path('', include('view_request.urls')),
     path('departments/', include('department.urls')),
     path('tickets/', include('tickets.urls')),
     path('network/', include('network.urls')),
     path('assets/', include('assets.urls')),
-    path('view_request/', include('view_request.urls')),
     path('accounts/', include('accounts.urls')),
     path('notifications/', include('notifications.urls')),
     path('', include('network_api.urls')),
     path('', include('core.urls')),
+    #redirected view request to the new link ticket/api
+    path('view_request/', lambda request: redirect('/tickets/api/')),
 ]

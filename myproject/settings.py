@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'knowledge',
     'homepage',
-    'view_request',
     'department',
     'tickets',
     'network',
@@ -49,6 +48,7 @@ INSTALLED_APPS = [
     'notifications',
     'network_api',
     'core',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

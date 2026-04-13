@@ -276,3 +276,1239 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Asset Inventory Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8ff47;
+    --accent2: #7c5cff;
+    --text: #f0f0f5;
+    --muted: #666680;
+    --danger: #ff4757;
+    --warn: #ffb347;
+    --success: #2ecc71;
+    --sidebar-w: 230px;
+    --nav-h: 60px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav.topbar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    z-index: 100;
+    gap: 16px;
+  }
+
+  .brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand-dot {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--accent);
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 8px var(--accent); }
+    50% { box-shadow: 0 0 20px var(--accent), 0 0 40px rgba(232,255,71,0.3); }
+  }
+
+  .nav-spacer { flex: 1; }
+
+  .nav-badge {
+    font-size: 0.7rem;
+    background: rgba(124,92,255,0.15);
+    border: 1px solid rgba(124,92,255,0.4);
+    color: #a990ff;
+    padding: 4px 10px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #000;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    width: var(--sidebar-w);
+    height: calc(100vh - var(--nav-h));
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-section {
+    padding: 0 16px 8px;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-top: 16px;
+  }
+
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    padding: 10px 20px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+  .sidebar a:hover, .sidebar a.active {
+    color: var(--text);
+    border-left-color: var(--accent);
+    background: rgba(232,255,71,0.04);
+  }
+
+  .sidebar a.active { color: var(--accent); }
+
+  .sidebar-icon {
+    width: 16px;
+    opacity: 0.7;
+    flex-shrink: 0;
+  }
+
+  .sidebar-count {
+    margin-left: auto;
+    background: rgba(255,255,255,0.07);
+    border-radius: 100px;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    color: var(--muted);
+  }
+
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .version-tag {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    padding-top: var(--nav-h);
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-content {
+    padding: 36px 32px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .page-title span { color: var(--accent); }
+
+  .page-subtitle {
+    color: var(--muted);
+    font-size: 0.78rem;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── STATS CARDS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(232,255,71,0.2);
+    transform: translateY(-2px);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.3;
+  }
+
+  .stat-card:nth-child(1)::before { background: var(--accent); }
+  .stat-card:nth-child(2)::before { background: var(--accent2); }
+  .stat-card:nth-child(3)::before { background: var(--success); }
+  .stat-card:nth-child(4)::before { background: var(--warn); }
+
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .stat-sub.up { color: var(--success); }
+  .stat-sub.down { color: var(--danger); }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 380px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.4;
+    width: 14px; height: 14px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 14px 10px 36px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-input::placeholder { color: var(--muted); }
+  .search-input:focus { border-color: rgba(232,255,71,0.4); }
+
+  .btn-filter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .btn-filter:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+
+  .btn-filter.active {
+    background: rgba(232,255,71,0.08);
+    border-color: rgba(232,255,71,0.3);
+    color: var(--accent);
+  }
+
+  .spacer { flex: 1; }
+
+  .btn-primary-add {
+    background: var(--accent);
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    letter-spacing: -0.01em;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary-add::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 0.2s;
+  }
+
+  .btn-primary-add:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,255,71,0.35); }
+  .btn-primary-add:hover::after { background: rgba(255,255,255,0.12); }
+  .btn-primary-add:active { transform: translateY(0); }
+
+  /* ── TABLE ── */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 13px 16px;
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+
+  thead th:hover { color: var(--text); }
+  thead th:first-child { padding-left: 20px; }
+  thead th:last-child { cursor: default; }
+
+  .th-inner { display: flex; align-items: center; gap: 5px; }
+
+  .sort-icon {
+    opacity: 0.3;
+    font-size: 0.7rem;
+    transition: opacity 0.2s;
+  }
+
+  th:hover .sort-icon { opacity: 0.7; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    animation: rowIn 0.25s ease both;
+  }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+
+  tbody td {
+    padding: 14px 16px;
+    font-size: 0.8rem;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child { padding-left: 20px; }
+
+  .td-id {
+    color: var(--muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+
+  .td-name { font-weight: 500; }
+
+  .badge-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+  }
+
+  .cat-electronics { background: rgba(124,92,255,0.12); color: #a990ff; border: 1px solid rgba(124,92,255,0.25); }
+  .cat-furniture    { background: rgba(232,255,71,0.08); color: #c8df30; border: 1px solid rgba(232,255,71,0.2); }
+  .cat-hardware     { background: rgba(255,71,87,0.1);  color: #ff7a87; border: 1px solid rgba(255,71,87,0.2); }
+  .cat-software     { background: rgba(46,204,113,0.1); color: #55e68a; border: 1px solid rgba(46,204,113,0.2); }
+  .cat-other        { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+
+  .qty-bar-wrap { display: flex; align-items: center; gap: 10px; }
+
+  .qty-bar {
+    flex: 1;
+    max-width: 80px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .qty-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .td-loc {
+    color: var(--muted);
+    font-size: 0.74rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .actions-cell { display: flex; align-items: center; gap: 6px; }
+
+  .btn-icon {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.75rem;
+  }
+
+  .btn-icon:hover { border-color: rgba(255,255,255,0.2); color: var(--text); background: rgba(255,255,255,0.04); }
+
+  .btn-icon.edit:hover { border-color: rgba(124,92,255,0.5); color: #a990ff; background: rgba(124,92,255,0.08); }
+  .btn-icon.del:hover  { border-color: rgba(255,71,87,0.4); color: var(--danger); background: rgba(255,71,87,0.06); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  .empty-text {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  /* ── PAGINATION ── */
+  .pagination-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+  }
+
+  .pagination-info {
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .pagination-btns {
+    display: flex;
+    gap: 4px;
+  }
+
+  .page-btn {
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .page-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .page-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 460px;
+    overflow: hidden;
+    animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px) scale(0.96); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .modal-close {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { background: rgba(255,71,87,0.1); border-color: rgba(255,71,87,0.3); color: var(--danger); }
+
+  .modal-body { padding: 24px; }
+
+  .form-group { margin-bottom: 18px; }
+
+  .form-label {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+
+  .form-control {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    padding: 10px 14px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-control::placeholder { color: var(--muted); }
+  .form-control:focus { border-color: rgba(232,255,71,0.4); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+  }
+
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-cancel:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  .btn-save {
+    background: var(--accent);
+    border: none;
+    color: #000;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 9px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: -0.01em;
+    transition: all 0.15s;
+  }
+
+  .btn-save:hover { box-shadow: 0 4px 16px rgba(232,255,71,0.3); transform: translateY(-1px); }
+
+  /* ── TOAST ── */
+  .toast-stack {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.78rem;
+    min-width: 220px;
+    animation: toastIn 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .toast.danger { border-left-color: var(--danger); }
+
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* ── CONFIRM DIALOG ── */
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    z-index: 300;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .confirm-overlay.open { display: flex; animation: fadeIn 0.2s; }
+
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid rgba(255,71,87,0.3);
+    border-radius: 12px;
+    padding: 28px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    animation: slideUp 0.2s both;
+  }
+
+  .confirm-icon { font-size: 2rem; margin-bottom: 12px; }
+  .confirm-title { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 8px; }
+  .confirm-msg { font-size: 0.78rem; color: var(--muted); margin-bottom: 20px; }
+  .confirm-btns { display: flex; gap: 10px; justify-content: center; }
+
+  .btn-confirm-del {
+    background: var(--danger);
+    border: none;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 9px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  .btn-confirm-del:hover { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<!-- Top Nav -->
+<nav class="topbar">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    ASSET<span style="color:var(--accent)">INV</span>
+  </div>
+  <div class="nav-spacer"></div>
+  <div class="nav-badge">v2.0 PRO</div>
+  <div class="nav-avatar">AK</div>
+</nav>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-section">Navigation</div>
+  <a href="#" class="active">
+    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    Dashboard
+    <span class="sidebar-count" id="sidebar-count">3</span>
+  </a>
+  <a href="#">
+    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/></svg>
+    Assets
+  </a>
+  <a href="#">
+    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+    Categories
+  </a>
+  <div class="sidebar-section">Analytics</div>
+  <a href="#">
+    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Reports
+  </a>
+  <a href="#">
+    <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+    Activity
+  </a>
+  <div class="sidebar-bottom">
+    <div class="version-tag">ASSET INVENTORY PRO · 2026</div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+  <div class="page-content">
+
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Asset <span>Registry</span></div>
+        <div class="page-subtitle">Track, manage and audit all organizational assets</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Assets</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub up">↑ Updated now</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Categories</div>
+        <div class="stat-value" id="stat-cats">—</div>
+        <div class="stat-sub">Unique types</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Units</div>
+        <div class="stat-value" id="stat-qty">—</div>
+        <div class="stat-sub">Across all assets</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Locations</div>
+        <div class="stat-value" id="stat-locs">—</div>
+        <div class="stat-sub">Distinct sites</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search by name or category…" oninput="filterAssets()" />
+      </div>
+      <button class="btn-filter" id="filterAll" onclick="setCatFilter('all')" style="color:var(--text);border-color:rgba(255,255,255,0.15)">All</button>
+      <button class="btn-filter" id="filterElec" onclick="setCatFilter('electronics')">Electronics</button>
+      <button class="btn-filter" id="filterFurn" onclick="setCatFilter('furniture')">Furniture</button>
+      <div class="spacer"></div>
+      <button class="btn-primary-add" onclick="showAddModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Asset
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)"><div class="th-inner">ID <span class="sort-icon">⇅</span></div></th>
+            <th onclick="sortTable(1)"><div class="th-inner">Asset Name <span class="sort-icon">⇅</span></div></th>
+            <th onclick="sortTable(2)"><div class="th-inner">Category <span class="sort-icon">⇅</span></div></th>
+            <th onclick="sortTable(3)"><div class="th-inner">Quantity <span class="sort-icon">⇅</span></div></th>
+            <th onclick="sortTable(4)"><div class="th-inner">Location <span class="sort-icon">⇅</span></div></th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="assetBody"></tbody>
+      </table>
+      <div id="emptyState" class="empty-state" style="display:none;">
+        <div class="empty-icon">◻</div>
+        <div class="empty-text">No assets found. Try a different search.</div>
+      </div>
+      <div class="pagination-row">
+        <div class="pagination-info" id="pageInfo"></div>
+        <div class="pagination-btns" id="pagination"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="assetModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Add Asset</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="assetId" />
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Asset Name</label>
+          <input type="text" class="form-control" id="assetName" placeholder="e.g. Dell XPS 13" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <input type="text" class="form-control" id="category" placeholder="e.g. Electronics" required />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Quantity</label>
+          <input type="number" class="form-control" id="quantity" min="1" placeholder="1" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input type="text" class="form-control" id="location" placeholder="e.g. Office A" required />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveAsset()">Save Asset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Dialog -->
+<div class="confirm-overlay" id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-icon">⚠</div>
+    <div class="confirm-title">Delete Asset?</div>
+    <div class="confirm-msg" id="confirmMsg">This action cannot be undone.</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Stack -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script>
+let assets = [
+  {id: 1, name: "Laptop Dell XPS 13", category: "Electronics", quantity: 10, location: "Office A"},
+  {id: 2, name: "Projector Epson", category: "Electronics", quantity: 2, location: "Conference Room"},
+  {id: 3, name: "Office Desk", category: "Furniture", quantity: 5, location: "Office B"},
+  {id: 4, name: "Standing Mat", category: "Furniture", quantity: 8, location: "Office A"},
+  {id: 5, name: "Wireless Mouse", category: "Electronics", quantity: 15, location: "Storage"},
+  {id: 6, name: "Ethernet Switch", category: "Hardware", quantity: 3, location: "Server Room"},
+];
+
+let currentPage = 1;
+const rowsPerPage = 5;
+let filteredAssets = [...assets];
+let sortDir = {};
+let catFilter = 'all';
+let pendingDeleteId = null;
+
+// ── Helpers ──
+function getCatClass(cat) {
+  const c = cat.toLowerCase();
+  if (c.includes('elec')) return 'cat-electronics';
+  if (c.includes('furn')) return 'cat-furniture';
+  if (c.includes('hard')) return 'cat-hardware';
+  if (c.includes('soft')) return 'cat-software';
+  return 'cat-other';
+}
+
+function maxQty() {
+  return Math.max(...assets.map(a => a.quantity), 1);
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = assets.length;
+  document.getElementById('stat-cats').textContent = new Set(assets.map(a => a.category)).size;
+  document.getElementById('stat-qty').textContent = assets.reduce((s, a) => s + a.quantity, 0);
+  document.getElementById('stat-locs').textContent = new Set(assets.map(a => a.location)).size;
+  document.getElementById('sidebar-count').textContent = assets.length;
+}
+
+// ── Toast ──
+function showToast(msg, type='') {
+  const stack = document.getElementById('toastStack');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  stack.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity 0.3s'; }, 2400);
+  setTimeout(() => t.remove(), 2800);
+}
+
+// ── Display ──
+function displayAssets() {
+  const tbody = document.getElementById('assetBody');
+  tbody.innerHTML = '';
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const page = filteredAssets.slice(start, start + rowsPerPage);
+  const mq = maxQty();
+
+  document.getElementById('emptyState').style.display = filteredAssets.length === 0 ? '' : 'none';
+
+  page.forEach((a, idx) => {
+    const delay = idx * 40;
+    const pct = Math.round((a.quantity / mq) * 100);
+    tbody.innerHTML += `
+      <tr style="animation-delay:${delay}ms">
+        <td class="td-id">#${String(a.id).padStart(4,'0')}</td>
+        <td class="td-name">${a.name}</td>
+        <td><span class="badge-cat ${getCatClass(a.category)}">${a.category}</span></td>
+        <td>
+          <div class="qty-bar-wrap">
+            <span>${a.quantity}</span>
+            <div class="qty-bar"><div class="qty-bar-fill" style="width:${pct}%"></div></div>
+          </div>
+        </td>
+        <td>
+          <div class="td-loc">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            ${a.location}
+          </div>
+        </td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn-icon edit" onclick="showEditModal(${a.id})" title="Edit">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon del" onclick="askDelete(${a.id},'${a.name}')" title="Delete">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+  });
+
+  renderPagination();
+  updateStats();
+}
+
+function renderPagination() {
+  const total = filteredAssets.length;
+  const pageCount = Math.ceil(total / rowsPerPage);
+  const start = Math.min((currentPage - 1) * rowsPerPage + 1, total);
+  const end = Math.min(currentPage * rowsPerPage, total);
+
+  document.getElementById('pageInfo').textContent =
+    total === 0 ? '0 results' : `${start}–${end} of ${total} assets`;
+
+  const pag = document.getElementById('pagination');
+  pag.innerHTML = '';
+
+  const addBtn = (label, page, active) => {
+    const b = document.createElement('button');
+    b.className = 'page-btn' + (active ? ' active' : '');
+    b.textContent = label;
+    b.onclick = () => { currentPage = page; displayAssets(); };
+    pag.appendChild(b);
+  };
+
+  if (pageCount <= 1) return;
+  if (currentPage > 1) addBtn('‹', currentPage - 1, false);
+  for (let i = 1; i <= pageCount; i++) addBtn(i, i, i === currentPage);
+  if (currentPage < pageCount) addBtn('›', currentPage + 1, false);
+}
+
+// ── Filter & Sort ──
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  filteredAssets = assets.filter(a => {
+    const matchSearch = a.name.toLowerCase().includes(q) || a.category.toLowerCase().includes(q);
+    const matchCat = catFilter === 'all' || a.category.toLowerCase().includes(catFilter);
+    return matchSearch && matchCat;
+  });
+  currentPage = 1;
+  displayAssets();
+}
+
+function filterAssets() { applyFilters(); }
+
+function setCatFilter(cat) {
+  catFilter = cat;
+  document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+  const map = {all:'filterAll', electronics:'filterElec', furniture:'filterFurn'};
+  if (map[cat]) document.getElementById(map[cat]).classList.add('active');
+  applyFilters();
+}
+
+function sortTable(n) {
+  const keys = ['id','name','category','quantity','location'];
+  const key = keys[n];
+  const dir = sortDir[key] === 'asc' ? 'desc' : 'asc';
+  sortDir = {};
+  sortDir[key] = dir;
+  filteredAssets.sort((a,b) => {
+    if (a[key] < b[key]) return dir === 'asc' ? -1 : 1;
+    if (a[key] > b[key]) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  displayAssets();
+}
+
+// ── Modal ──
+function showAddModal() {
+  document.getElementById('assetId').value = '';
+  document.getElementById('assetName').value = '';
+  document.getElementById('category').value = '';
+  document.getElementById('quantity').value = '';
+  document.getElementById('location').value = '';
+  document.getElementById('modalTitle').textContent = 'Add Asset';
+  document.getElementById('assetModal').classList.add('open');
+  document.getElementById('assetName').focus();
+}
+
+function showEditModal(id) {
+  const a = assets.find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('assetId').value = a.id;
+  document.getElementById('assetName').value = a.name;
+  document.getElementById('category').value = a.category;
+  document.getElementById('quantity').value = a.quantity;
+  document.getElementById('location').value = a.location;
+  document.getElementById('modalTitle').textContent = 'Edit Asset';
+  document.getElementById('assetModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('assetModal').classList.remove('open');
+}
+
+function saveAsset() {
+  const id = document.getElementById('assetId').value;
+  const name = document.getElementById('assetName').value.trim();
+  const category = document.getElementById('category').value.trim();
+  const quantity = parseInt(document.getElementById('quantity').value);
+  const location = document.getElementById('location').value.trim();
+
+  if (!name || !category || !quantity || !location) {
+    showToast('⚠ Please fill in all fields.', 'danger'); return;
+  }
+
+  if (id) {
+    const a = assets.find(x => x.id == id);
+    a.name = name; a.category = category; a.quantity = quantity; a.location = location;
+    showToast('✓ Asset updated successfully.');
+  } else {
+    const newId = assets.length ? Math.max(...assets.map(a => a.id)) + 1 : 1;
+    assets.push({id: newId, name, category, quantity, location});
+    showToast('✓ Asset added successfully.');
+  }
+
+  filteredAssets = [...assets];
+  applyFilters();
+  closeModal();
+}
+
+// ── Delete ──
+function askDelete(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('confirmMsg').textContent = `Delete "${name}"? This cannot be undone.`;
+  document.getElementById('confirmModal').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('open');
+  pendingDeleteId = null;
+}
+
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  assets = assets.filter(a => a.id !== pendingDeleteId);
+  filteredAssets = filteredAssets.filter(a => a.id !== pendingDeleteId);
+  closeConfirm();
+  displayAssets();
+  showToast('Asset deleted.', 'danger');
+}
+
+// ── Close modals on overlay click ──
+document.getElementById('assetModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.getElementById('confirmModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeConfirm();
+});
+
+// ── Init ──
+window.onload = () => {
+  setCatFilter('all');
+  displayAssets();
+};
+</script>
+</body>
+</html>
