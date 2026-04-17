@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-b&6b7!$zru%l*t+^20n@bkpjj5-!xrw=v3=!g%#4n5utojm(q^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['tickets.local', 'localhost', '127.0.0.1', '*']
 
 
 # Application definition
