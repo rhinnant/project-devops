@@ -10,7 +10,7 @@
             <p class="card-text">{{ task.description }}</p>
             <p class="card-text"><small class="text-muted">Created at: {{ task.created_at }}</small></p>
             <p class="card-text">
-                Status: 
+                Status:
                 {% if task.completed %}
                     <span class="badge bg-success">Completed</span>
                 {% else %}
@@ -48,4 +48,3 @@
     </div>
 </div>
 {% endblock %}
-

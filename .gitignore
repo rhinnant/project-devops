@@ -9,3 +9,5 @@ __pycache__/
 minikube-linux-amd64
 *.Zone.Identifier
 1
+venv/
+.secrets.baseline

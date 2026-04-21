@@ -28,4 +28,3 @@ def task_detail(request, task_id):
             comment.save()
             return redirect('task_detail', task_id=task.id)
     return render(request, 'task/task_detail.html', {'task': task, 'comment_form': comment_form})
-

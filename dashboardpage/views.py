@@ -14,7 +14,7 @@ def home(request):
 
     # Progress calculations
     total_tickets = max(
-        new_tickets_count + in_progress_tickets_count + resolved_tickets_count, 
+        new_tickets_count + in_progress_tickets_count + resolved_tickets_count,
         1
     )
 
@@ -23,7 +23,7 @@ def home(request):
     resolved_tickets_percent = round(resolved_tickets_count / total_tickets * 100)
 
     # Optional SLA progress (always 100 or calculate real metrics later)
-    sla_percent = 100  
+    sla_percent = 100
 
     # Recent tickets table
     recent_tickets = Ticket.objects.order_by('-id')[:5]
@@ -45,4 +45,3 @@ def home(request):
     }
 
     return render(request, 'dashboard/home.html', context)
-
