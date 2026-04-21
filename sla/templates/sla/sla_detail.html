@@ -1,0 +1,11 @@
+{% extends 'sla/base_sla.html' %}
+{% block title %}SLA Detail{% endblock %}
+{% block content %}
+<h2>{{ sla.ticket }} - Details</h2>
+<p><strong>Status:</strong> {{ sla.status }}</p>
+<p><strong>Description:</strong> {{ sla.description }}</p>
+<p><strong>Start:</strong> {{ sla.start_time }}</p>
+<p><strong>End:</strong> {{ sla.end_time }}</p>
+<a href="{% url 'sla:list' %}" class="btn btn-secondary mt-3">Back to List</a>
+{% endblock %}
+

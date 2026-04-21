@@ -1,0 +1,30 @@
+{% extends 'sla/base_sla.html' %}
+{% block title %}All SLAs{% endblock %}
+{% block content %}
+<h2>All SLAs</h2>
+<table class="table table-hover mt-3">
+<thead>
+<tr>
+<th>ID</th>
+<th>Ticket</th>
+<th>Status</th>
+<th>Start</th>
+<th>End</th>
+<th>Details</th>
+</tr>
+</thead>
+<tbody>
+{% for sla in slas %}
+<tr>
+<td>{{ sla.id }}</td>
+<td>{{ sla.ticket }}</td>
+<td>{{ sla.status }}</td>
+<td>{{ sla.start_time|date:"Y-m-d H:i" }}</td>
+<td>{{ sla.end_time|date:"Y-m-d H:i" }}</td>
+<td><a href="{% url 'sla:detail' sla.id %}" class="btn btn-sm btn-primary">View</a></td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}
+

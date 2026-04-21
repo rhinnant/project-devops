@@ -1,0 +1,11 @@
+{% extends 'sla/base_sla.html' %}
+{% block title %}SLA Dashboard{% endblock %}
+{% block content %}
+<h2>SLA Overview</h2>
+<div class="row g-4 mt-3">
+    <div class="col-md-4"><div class="card p-3 shadow"><h5>Total SLAs</h5><h3>{{ sla_count }}</h3></div></div>
+    <div class="col-md-4"><div class="card p-3 shadow"><h5>On Track</h5><h3>{{ on_track }}</h3></div></div>
+    <div class="col-md-4"><div class="card p-3 shadow"><h5>Breached</h5><h3>{{ breached }}</h3></div></div>
+</div>
+{% endblock %}
+

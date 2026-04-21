@@ -1,0 +1,37 @@
+{% extends "operations/base_operations.html" %}
+
+{% block title %}Operations List{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Operations</h2>
+
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Created At</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for op in operations %}
+        <tr>
+            <td>{{ op.name }}</td>
+            <td>{{ op.status }}</td>
+            <td>{{ op.created_at|date:"Y-m-d H:i" }}</td>
+            <td>
+                <a class="btn btn-sm btn-primary"
+                   href="{% url 'operations_detail' op.id %}">View</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">No operations found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+

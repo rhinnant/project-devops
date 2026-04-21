@@ -1,0 +1,18 @@
+{% extends "operations/base_operations.html" %}
+
+{% block title %}Operation Details{% endblock %}
+
+{% block content %}
+<h2>Operation Details</h2>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h4>{{ operation.name }}</h4>
+        <p><strong>Status:</strong> {{ operation.status }}</p>
+        <p><strong>Created:</strong> {{ operation.created_at }}</p>
+    </div>
+</div>
+
+<a class="btn btn-secondary mt-3" href="{% url 'operations_list' %}">Back</a>
+{% endblock %}
+

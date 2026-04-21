@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+.venv/
+
+*.hpi
+*.deb
+minikube-linux-amd64
+*.Zone.Identifier
+1
