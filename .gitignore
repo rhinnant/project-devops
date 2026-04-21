@@ -1,25 +1,24 @@
-# Python / Django
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.sqlite3
 
 # Virtual environment
 venv/
-env/
+.env/
+.env.*
 
-# Django secrets
-*.env
-.env
+# Django
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
 
-# PostgreSQL dumps
-*.sql
+# Logs
+*.log
 
-# Byte-compiled/cached
-*.egg-info/
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 
@@ -27,6 +26,18 @@ env/
 .DS_Store
 Thumbs.db
 
-*.deb
-minikube-linux-amd64
-*.hpi
+# Docker
+*.tar
+*.img
+
+# Kubernetes / local configs
+kubeconfig
+*.kubeconfig
+
+# Testing / coverage
+htmlcov/
+.coverage
+
+# Node (if used later)
+node_modules/
+npm-debug.log*
