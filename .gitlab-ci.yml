@@ -34,13 +34,10 @@ build_and_push:
 
 deploy:
   stage: deploy
-  image:
-    name: bitnami/kubectl:latest
-    entrypoint: [""]
+  tags:
+    - local
   script:
     - echo "Deploying to Kubernetes..."
-    - mkdir -p ~/.kube
-    - echo "$KUBECONFIG_BASE64" | base64 -d > ~/.kube/config
     - kubectl apply -f $KUBE_DEPLOY_FILE
   only:
     - main
