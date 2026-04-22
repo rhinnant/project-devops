@@ -5,8 +5,8 @@ stages:
 
 variables:
   DOCKER_IMAGE: rhinnant/devnet_dashboard:latest
-  DOCKERFILE_PATH: it_dashboard/Dockerfile
-  BUILD_CONTEXT: it_dashboard
+  DOCKERFILE_PATH: Dockerfile
+  BUILD_CONTEXT: .
   KUBE_DEPLOY_FILE: django-deploy1.yaml
 
 before_script:
