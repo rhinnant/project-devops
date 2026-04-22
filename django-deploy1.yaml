@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: django
-        image: it_dashboard_app
-        imagePullPolicy: Never
+        image: hinn8823/devnet_dashboard:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
