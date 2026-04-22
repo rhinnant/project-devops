@@ -34,7 +34,9 @@ build_and_push:
 
 deploy:
   stage: deploy
-  image: bitnami/kubectl:latest
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
   script:
     - echo "Deploying to Kubernetes..."
     - kubectl apply -f $KUBE_DEPLOY_FILE
